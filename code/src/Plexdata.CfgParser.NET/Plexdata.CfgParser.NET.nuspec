@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/akesseler/Plexdata.CfgParser/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/akesseler/Plexdata.CfgParser</projectUrl>
+    <iconUrl>https://github.com/akesseler/Plexdata.CfgParser/blob/master/icon.png?raw=true</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial draft.</releaseNotes>
+    <copyright>Copyright © 2018 - plexdata.de</copyright>
+    <tags>Cfg ini file parser</tags>
+  </metadata>
+</package>
