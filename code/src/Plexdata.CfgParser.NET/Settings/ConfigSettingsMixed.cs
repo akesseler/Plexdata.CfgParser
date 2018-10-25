@@ -23,7 +23,6 @@
  */
 
 using Plexdata.CfgParser.Constants;
-using System;
 
 namespace Plexdata.CfgParser.Settings
 {

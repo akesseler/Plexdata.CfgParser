@@ -26,7 +26,6 @@ using NUnit.Framework;
 using Plexdata.CfgParser.Entities;
 using Plexdata.CfgParser.Settings;
 using System;
-using System.Text;
 
 namespace Plexdata.CfgParser.Tests.Settings
 {

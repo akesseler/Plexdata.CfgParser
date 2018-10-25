@@ -45,8 +45,6 @@ namespace Plexdata.CfgParser.Processors
     /// </typeparam>
     public static class ConfigParser<TInstance> where TInstance : class
     {
-        // TODO: Finalize documentation.
-
         #region Public methods
 
         /// <summary>
@@ -341,6 +339,31 @@ namespace Plexdata.CfgParser.Processors
             }
         }
 
+        /// <summary>
+        /// This method creates a new configuration section item.
+        /// </summary>
+        /// <remarks>
+        /// The resulting target might be <c>null</c>. This may happen for example in cases if 
+        /// the corresponding section instance is <c>null</c> as well.
+        /// </remarks>
+        /// <param name="content">
+        /// The parent configuration container.
+        /// </param>
+        /// <param name="section">
+        /// The descriptor that describes the details of the new section.
+        /// </param>
+        /// <param name="parent">
+        /// The property information to get the value information from.
+        /// </param>
+        /// <param name="source">
+        /// The source object to read the value data from.
+        /// </param>
+        /// <param name="target">
+        /// The object containing the resulting target.
+        /// </param>
+        /// <returns>
+        /// A new instance of a configuration section.
+        /// </returns>
         private static ConfigSection CreateConfigSection(ConfigContent content, SectionDescriptor section, PropertyInfo parent, Object source, out Object target)
         {
             ConfigSection result = new ConfigSection(section.Descriptor, section.Attribute.Comment);
@@ -351,6 +374,28 @@ namespace Plexdata.CfgParser.Processors
             return result;
         }
 
+        /// <summary>
+        /// This method creates a new configuration value item.
+        /// </summary>
+        /// <remarks>
+        /// A value of <c>null</c> is returned in case of a value descriptor could not 
+        /// be found or in case of <paramref name="source"/> is <c>null</c>.
+        /// </remarks>
+        /// <param name="section">
+        /// The descriptor of the parent section.
+        /// </param>
+        /// <param name="source">
+        /// The source object to read the value data from.
+        /// </param>
+        /// <param name="property">
+        /// The corresponding property information used to query the value from.
+        /// </param>
+        /// <param name="culture">
+        /// The culture to be used for value type conversion.
+        /// </param>
+        /// <returns>
+        /// A new instance of a configuration value.
+        /// </returns>
         private static ConfigValue CreateConfigValue(SectionDescriptor section, Object source, PropertyInfo property, CultureInfo culture)
         {
             ValueDescriptor value = ConfigParser<TInstance>.TryFindValueDescriptor(section.Values, property);
@@ -360,16 +405,59 @@ namespace Plexdata.CfgParser.Processors
                 return null;
             }
 
-            return new ConfigValue(
-                value.Descriptor,
-                ConfigParser<TInstance>.ValueToString(source, property, culture),
-                value.Attribute.Comment);
+            if (source == null)
+            {
+                return null;
+            }
+
+            String result = ConfigParser<TInstance>.ValueToString(source, property, value.Attribute.Default, culture);
+
+            return new ConfigValue(value.Descriptor, result, value.Attribute.Comment);
         }
 
-        private static String ValueToString(Object source, PropertyInfo property, CultureInfo culture)
+        /// <summary>
+        /// This method tries to convert value of property source into its string representation.
+        /// </summary>
+        /// <remarks>
+        /// If getting an assigned value returns a valid object this object is converted into a 
+        /// string. If instead getting an assigned value returns a <c>null</c> object the fallback 
+        /// value is determined. If in this case the fallback is valid then its value is converted 
+        /// into a string. Otherwise, an empty string is returned.
+        /// </remarks>
+        /// <param name="source">
+        /// The source object to get the value from.
+        /// </param>
+        /// <param name="property">
+        /// The corresponding property information used to query the value from.
+        /// </param>
+        /// <param name="fallback">
+        /// The fallback value use as default if needed.
+        /// </param>
+        /// <param name="culture">
+        /// The culture to be used for value type conversion.
+        /// </param>
+        /// <returns>
+        /// A string representing the assigned value.
+        /// </returns>
+        private static String ValueToString(Object source, PropertyInfo property, Object fallback, CultureInfo culture)
         {
             Object result = property.GetValue(source);
-            return result == null ? String.Empty : Convert.ToString(result, culture);
+
+            if (result == null)
+            {
+                if (fallback == null)
+                {
+                    return String.Empty;
+                }
+                else
+                {
+                    return Convert.ToString(fallback, culture);
+                }
+            }
+            else
+            {
+                return Convert.ToString(result, culture);
+            }
         }
 
         /// <summary>
@@ -422,6 +510,22 @@ namespace Plexdata.CfgParser.Processors
             return section.Values.Where(x => descriptor.Equals(x.Label)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// This method tries to find the value descriptor inside the list of <paramref name="values"/> 
+        /// for provided <paramref name="source"/> property information.
+        /// </summary>
+        /// <remarks>
+        /// Searching for a value descriptor takes place by using standard string comparison.
+        /// </remarks>
+        /// <param name="values">
+        /// The list of values to be parsed.
+        /// </param>
+        /// <param name="source">
+        /// The source property information to find its value descriptor for.
+        /// </param>
+        /// <returns>
+        /// The corresponding value descriptor or <c>null</c> if not found.
+        /// </returns>
         private static ValueDescriptor TryFindValueDescriptor(IList<ValueDescriptor> values, PropertyInfo source)
         {
             return values.Where(x => String.Equals(x.Property.Name, source.Name)).FirstOrDefault();

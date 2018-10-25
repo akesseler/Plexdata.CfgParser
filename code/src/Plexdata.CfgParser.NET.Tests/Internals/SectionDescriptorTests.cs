@@ -34,7 +34,6 @@ namespace Plexdata.CfgParser.Tests.Internals
     [TestOf(nameof(SectionDescriptor))]
     public class SectionDescriptorTests
     {
-
         [Test]
         public void Construction_InvalidAttribute_ThrowsArgumentNullException()
         {
@@ -80,8 +79,8 @@ namespace Plexdata.CfgParser.Tests.Internals
         [TestCase("funny-attribute", "FunnyProperty", "Funny-Attribute", true)]
         [TestCase("FUNNY-ATTRIBUTE", "FunnyProperty", "Funny-Attribute", true)]
         [TestCase(null, "FunnyProperty", "NoFunnyProperty", false)]
-        [TestCase("", "FunnyProperty", "NoFunnyProperty",   false)]
-        [TestCase(" ", "FunnyProperty", "NoFunnyProperty",  false)]
+        [TestCase("", "FunnyProperty", "NoFunnyProperty", false)]
+        [TestCase(" ", "FunnyProperty", "NoFunnyProperty", false)]
         [TestCase("Funny-Attribute", "FunnyProperty", "No-Funny-Attribute", false)]
         [TestCase("funny-attribute", "FunnyProperty", "No-Funny-Attribute", false)]
         [TestCase("FUNNY-ATTRIBUTE", "FunnyProperty", "No-Funny-Attribute", false)]
