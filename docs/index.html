@@ -9,7 +9,7 @@ body {
 }
 .navbar {
     height: 100%;
-    width: 165px;
+    width: 180px;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -70,9 +70,11 @@ tbody tr:nth-child(odd){
   <a href="#overview">Overview</a>
   <a href="#licensing">Licensing</a>
   <a href="#installation">Installation</a>
+  <a href="#introduction">Introduction</a>
   <a href="#reading">Reading</a>
   <a href="#writing">Writing</a>
   <a href="#limitation">Limitation</a>
+  <a href="#known-issues">Known Issues</a>
 </div>
 <div class="content">
   
@@ -81,8 +83,18 @@ tbody tr:nth-child(odd){
 <h2 id="overview">Overview</h2>
 
 <p>
-The <i>Plexdata CFG Parser</i> represents a library that allows reading and writing of CFG/INI 
-files...
+The <i>Plexdata CFG Parser</i> represents a library allowing reading and writing of old&#8209;fashioned 
+CFG and INI files into structured configuration items. It is also possible to configure the behavior of 
+how files are read or written.
+</p>
+<p>
+Furthermore, a set of structured configuration items can be converted into user&#8209;defined classes. 
+This makes it possible to directly read a configuration file into a class structure. Of course, writing 
+a configuration file from a class structure is possible as well.
+</p>
+<p>
+Different styles of configuration files are also supported. Already predefined are the Windows and Linux 
+styles, but configuring user&#8209;defined styles is supported as well.
 </p>
 
 <h2 id="licensing">Licensing</h2>
@@ -153,6 +165,45 @@ Additionally, all releases can be downloaded from <i>GitHub</i>. Please visit pa
 to find all available versions.
 </p>
 
+<h2 id="introduction">Introduction</h2>
+
+<p>
+In the age of having configuration file formats like JSON or XML a configuration file format like INI 
+seems to be pretty old&#8209;fashioned. And indeed it is. But from time to time it is useful to support a 
+standard INI configuration file. And this library is intended for exactly these special use&#8209;cases.
+</p>
+
+<p>
+As first let&rsquo;s have a short glance at what exactly is meant when talking about INI files.
+</p>
+
+<p>
+In fact, a standard INI file is nothing else but a collection of key&#8209;value&#8209;pairs. Additionally, 
+these key&#8209;value&#8209;pairs can be grouped into sections. See example below for some details.
+</p>
+
+<pre><code>[general]
+enable-show-pages: yes
+enable-show-styles: no
+default-language: english
+
+[network]
+server-address: 192.168.5.42
+server-port: 45054</code></pre>
+
+<p>
+
+On the other hand, each of the systems uses a different format for such types of configuration files. 
+For example, Windows INI files usually use the equal sign (=) to separate a label from its value. 
+And vice versa, on Linux systems a colon (:) is used instead. 
+This makes it almost impossible to load configuration files of both systems with the same software.
+</p>
+
+
+<b><i>TODO: Continue here...</i></b>
+
+
+
 <h2 id="reading">Reading</h2>
 
 <p>
@@ -168,7 +219,69 @@ The same as mentioned in section <a href="#writing">Writing</a> applies to Writi
 <h2 id="limitation">Limitation</h2>
 
 <p>
-There no known limitations on the <i>Plexdata CFG Parser</i> at the moment.
+There are some limitations when using the <i>Plexdata CFG Parser</i>. Clarifying them is task 
+of this section.
+</p>
+
+<ul>
+<li>
+Data parts of configuration values must <b>not</b> contain additional double quotes. For more 
+information please refer to section <a href="#double-quotes">Inner Double Quotes</a>.
+</li>
+<li>
+Leading and/or trailing section and/or value comments are not supported. Comments can only be 
+placed behind sections and/or values.
+</li>
+<li>
+Multi&#8209;line comments behind sections and/or values are not supported. Only single line comments 
+are possible. For more information see section <a href="#multiline-comments">Multi&#8209;line Comments</a>.
+</li>
+<li>
+Creating a configuration from scratch or reading an existing configuration file may cause trouble 
+when writing it back to disk. Please see section <a href="#losing-content">Losing File Content</a> 
+below for more information.
+</li>
+</ul>
+
+<h2 id="known-issues">Known Issues</h2>
+
+<h3 id="double-quotes">Inner Double Quotes</h3>
+
+Inner double quotes like shown below are not supported at the moment.
+
+<pre><code>value-label="Inner double quote characters (") are not supported"</code></pre>
+
+Escaping them like <code>"inner \"value"</code> does unfortunately not work.
+
+<h3 id="multiline-comments">Multi&#8209;line Comments</h3>
+
+<p>
+Multi&#8209;line comments like shown below won&rsquo;t work.
+</p>
+
+<pre><code>label-1=value-1 # comment line 1
+                # comment line 2
+                # comment line 3
+label-2=value-2</code></pre>
+
+<p>
+Only single line comments, as shown as follows, are supported.
+</p>
+
+<pre><code>[section-1] # section comment...
+label-1=value-1 # value 1 comment...
+label-2=value-2 # value 2 comment...</code></pre>
+
+<p>
+Please keep in mind, single line comments are exclusively reserved for the header of a 
+configuration file.
+</p>
+
+<h3 id="losing-content">Losing File Content</h3>
+<p>
+The complete content of an already existing file is disposed as soon as a configuration content 
+is written back to this file. This means, it is impossible to selectively update only the data 
+that have been changed.
 </p>
 
 </div>
