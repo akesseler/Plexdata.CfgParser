@@ -26,6 +26,7 @@ using NUnit.Framework;
 using Plexdata.CfgParser.Converters;
 using System;
 using System.Globalization;
+using System.Net;
 
 namespace Plexdata.CfgParser.Tests.Converters
 {
@@ -44,6 +45,8 @@ namespace Plexdata.CfgParser.Tests.Converters
 
         [Test]
         [TestCase(typeof(String))]
+        [TestCase(typeof(Version))]
+        [TestCase(typeof(IPAddress))]
         [TestCase(typeof(Char))]
         [TestCase(typeof(Char?))]
         [TestCase(typeof(Boolean))]
@@ -216,6 +219,32 @@ namespace Plexdata.CfgParser.Tests.Converters
         public void Convert_ValueIsString_ResultIsExpected(String value, Object expected)
         {
             Assert.That(ValueConverter.Convert(value, typeof(String)), Is.EqualTo(expected));
+        }
+
+        [Test]
+        [TestCase(null, null)]
+        [TestCase("", null)]
+        [TestCase(" ", null)]
+        [TestCase("1.2", "1.2")]
+        [TestCase("1.2.3", "1.2.3")]
+        [TestCase("1.2.3.4", "1.2.3.4")]
+        public void Convert_ValueIsVersion_ResultIsExpected(String value, Object expected)
+        {
+            Version version = expected == null ? null : new Version(expected.ToString());
+            Assert.That(ValueConverter.Convert(value, typeof(Version)), Is.EqualTo(version));
+        }
+
+        [Test]
+        [TestCase(null, null)]
+        [TestCase("", null)]
+        [TestCase(" ", null)]
+        [TestCase("1.2", "1.2")]
+        [TestCase("1.2.3", "1.2.3")]
+        [TestCase("1.2.3.4", "1.2.3.4")]
+        public void Convert_ValueIsIPAddress_ResultIsExpected(String value, Object expected)
+        {
+            IPAddress address = expected == null ? null : IPAddress.Parse(expected.ToString());
+            Assert.That(ValueConverter.Convert(value, typeof(IPAddress)), Is.EqualTo(address));
         }
 
         [Test]

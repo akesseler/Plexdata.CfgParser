@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 
 namespace Plexdata.CfgParser.Converters
@@ -66,6 +67,8 @@ namespace Plexdata.CfgParser.Converters
         private static readonly Dictionary<Type, Delegate> types = new Dictionary<Type, Delegate>
         {
             [typeof(String)] = new Func<String, CultureInfo, Object>(ValueConverter.ToStringSimple),
+            [typeof(Version)] = new Func<String, CultureInfo, Object>(ValueConverter.ToVersionSimple),
+            [typeof(IPAddress)] = new Func<String, CultureInfo, Object>(ValueConverter.ToIPAddressSimple),
             [typeof(Char)] = new Func<String, CultureInfo, Object>(ValueConverter.ToCharStandard),
             [typeof(Char?)] = new Func<String, CultureInfo, Object>(ValueConverter.ToCharNullable),
             [typeof(Boolean)] = new Func<String, CultureInfo, Object>(ValueConverter.ToBooleanStandard),
@@ -122,9 +125,9 @@ namespace Plexdata.CfgParser.Converters
         /// Gets the list of types supported by this converter.
         /// </summary>
         /// <remarks>
-        /// At the moment this list of supported types includes String, Char, Boolean, SByte, Byte, 
-        /// Int16, UInt16, Int32, UInt32, Int64, UInt64, DateTime, Decimal, Double, Single and Guid
-        /// as well as the nullable version of each of these types. Enumerations and their nullable 
+        /// At the moment this list of supported types includes String, Version, IP-Address, Char, Boolean, 
+        /// SByte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64, DateTime, Decimal, Double, Single and 
+        /// Guid as well as the nullable version of each of these types. Enumerations and their nullable 
         /// types are also supported.
         /// </remarks>
         /// <value>
@@ -429,6 +432,64 @@ namespace Plexdata.CfgParser.Converters
         private static Object ToStringSimple(String value, CultureInfo culture)
         {
             return value ?? String.Empty;
+        }
+
+        /// <summary>
+        /// This internal method converts provided value into its version representation.
+        /// </summary>
+        /// <remarks>
+        /// A <c>null</c> object is returned in case of provided value is <c>null</c> 
+        /// or empty or whitespace.
+        /// </remarks>
+        /// <param name="value">
+        /// The value to convert.
+        /// </param>
+        /// <param name="culture">
+        /// The culture to be used to convert the value.
+        /// </param>
+        /// <returns>
+        /// The object of the converted value.
+        /// </returns>
+        /// <exception cref="Exception">
+        /// Other exceptions form underlying type converter are also possible!
+        /// </exception>
+        private static Object ToVersionSimple(String value, CultureInfo culture)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return Version.Parse(value);
+        }
+
+        /// <summary>
+        /// This internal method converts provided value into its IP address representation.
+        /// </summary>
+        /// <remarks>
+        /// A <c>null</c> object is returned in case of provided value is <c>null</c> 
+        /// or empty or whitespace.
+        /// </remarks>
+        /// <param name="value">
+        /// The value to convert.
+        /// </param>
+        /// <param name="culture">
+        /// The culture to be used to convert the value.
+        /// </param>
+        /// <returns>
+        /// The object of the converted value.
+        /// </returns>
+        /// <exception cref="Exception">
+        /// Other exceptions form underlying type converter are also possible!
+        /// </exception>
+        private static Object ToIPAddressSimple(String value, CultureInfo culture)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return IPAddress.Parse(value);
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plexdata.CfgParser.NET", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plexdata.CfgParser.NET.Tests", "Plexdata.CfgParser.NET.Tests\Plexdata.CfgParser.NET.Tests.csproj", "{ECBBCD89-9D65-49DC-9EFB-2E2B211D938A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plexdata.CsvParser.Tester", "Plexdata.CfgParser.Tester\Plexdata.CsvParser.Tester.csproj", "{3A16FD06-A05F-4514-8F10-D25FC02ACD90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plexdata.CfgParser.Tester", "Plexdata.CfgParser.Tester\Plexdata.CfgParser.Tester.csproj", "{3A16FD06-A05F-4514-8F10-D25FC02ACD90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
