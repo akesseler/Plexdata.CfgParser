@@ -73,6 +73,8 @@ tbody tr:nth-child(odd){
   <a href="#introduction">Introduction</a>
   <a href="#reading">Reading</a>
   <a href="#writing">Writing</a>
+  <a href="#parsing">Parsing</a>
+  <a href="#setup">Setup</a>
   <a href="#limitation">Limitation</a>
   <a href="#known-issues">Known Issues</a>
 </div>
@@ -174,7 +176,7 @@ standard INI configuration file. And this library is intended for exactly these 
 </p>
 
 <p>
-As first let&rsquo;s have a short glance at what exactly is meant when talking about INI files.
+As first let&rsquo;s have a glance at what exactly is meant when talking about INI files.
 </p>
 
 <p>
@@ -199,21 +201,337 @@ And vice versa, on Linux systems a colon (:) is used instead.
 This makes it almost impossible to load configuration files of both systems with the same software.
 </p>
 
-
-<b><i>TODO: Continue here...</i></b>
-
-
-
 <h2 id="reading">Reading</h2>
 
 <p>
-Reading data from an external CFG file is pretty easy...
+Reading data from an external CFG file is pretty easy. The only thing to do is to call the <code>Read()</code> 
+method from class <code>ConfigReader</code>. As result of this an instance of class <code>ConfigContent</code>
+is returned. See below for an example.
 </p>
+
+<pre><code>String filename = @"C:\config.ini";
+ConfigContent content = ConfigReader.Read(filename);</code></pre>
+
+<p>
+Did no exception occur then an access to each configuration section as well as to each value of 
+a section is easily possible by using the array operator. Assuming the read configuration file 
+contains a section named <code>general</code> and there in a value named <code>version</code>. 
+Accessing this particular value can be done as shown in example right here below.
+</p>
+
+<pre><code>ConfigSection section = content["general"];
+if (section != null)
+{
+    ConfigValue value = section["version"];
+    if (value != null)
+    {
+        Version version = ValueConverter.Convert(value.Value, typeof(Version)) as Version;
+        Trace.WriteLine($"The verion is {version}");
+    }
+}</code></pre>
+
+<p>
+Sometimes it might be useful to find errors and/or misplaced configuration details. For this 
+purpose it is possible the provide an additional list of type <code>ConfigWarning</code>. This 
+list is filled up during file parsing and contains items in case of issues could be determined.
+How to determine configuration warnings is shown in example below.
+</p>
+
+<pre><code>String filename = @"C:\config.ini";
+List&lt;ConfigWarning&gt; warnings = new List&lt;ConfigWarning&gt;();
+ConfigContent content = ConfigReader.Read(filename, warnings);
+foreach (ConfigWarning warning in warnings)
+{
+    Trace.WriteLine(warning);
+}</code></pre>
+
+<p>
+Another aspect to be considered when processing a configuration file is the fact that users can 
+create and/or modify a configuration file. And for sure, users are not perfect and they do mistakes. 
+Such a mistake could be that lines are included which do not represent a value type.
+</p>
+<p>
+Being able to find this kind of values, class <code>ConfigContent</code> provides a property named 
+<code>Others</code>. How to use property <code>Others</code> is demonstrated below.
+</p>
+
+<pre><code>String filename = @"C:\config.ini";
+ConfigContent content = ConfigReader.Read(filename);
+ConfigOthers others = content.Others;
+if (others.IsValid)
+{
+    for (Int32 index = 0; index &lt; others.Count; index++)
+    {
+        ConfigOther other = others[index];
+        Trace.WriteLine(other.Value);
+    }
+}</code></pre>
 
 <h2 id="writing">Writing</h2>
 
 <p>
-The same as mentioned in section <a href="#writing">Writing</a> applies to Writing as well...
+In contrast to reading a configuration file, writing it requires a bit more effort. And how to 
+accomplish this task is part of this section.
+</p>
+
+<p>
+First of all, an instance of class <code>ConfigContent</code> must be created and configured as 
+well. See following example that shows how to prepare a configuration before it can be written.
+</p>
+
+<pre><code>ConfigContent content = new ConfigContent();
+ConfigSection section = new ConfigSection("general", "The general section contains global values.");
+ConfigValue value = new ConfigValue("enable-show-pages", "yes");
+section.Append(value);
+value = new ConfigValue("enable-show-styles", "no");
+section.Append(value);
+value = new ConfigValue("default-language", "english", "Using english, german and french is possible.");
+section.Append(value);
+content.Append(section);
+section = new ConfigSection("network", "The network section contains network values.");
+value = new ConfigValue("server-address", "192.168.5.42", "Using the host name is also possible.");
+section.Append(value);
+value = new ConfigValue("server-port", "45054");
+section.Append(value);
+content.Append(section);</code></pre>
+
+<p>
+Another way to initialize the configuration content is to use the array operators. How this can be done 
+is shown here below.
+</p>
+
+<pre><code>ConfigContent content = new ConfigContent();
+content["general"] = new ConfigSection();
+content["general"].Comment = new ConfigComment("The general section contains global values.");
+content["general"]["enable-show-pages"] = new ConfigValue();
+content["general"]["enable-show-pages"].Value = "yes";
+content["general"]["enable-show-styles"] = new ConfigValue();
+content["general"]["enable-show-styles"].Value = "no";
+content["general"]["default-language"] = new ConfigValue();
+content["general"]["default-language"].Value = "english";
+content["general"]["default-language"].Comment = new ConfigComment("Using english, german and french is possible.");
+content["network"] = new ConfigSection();
+content["network"].Comment = new ConfigComment("The network section contains network values.");
+content["network"]["server-address"] = new ConfigValue();
+content["network"]["server-address"].Value = "192.168.5.42";
+content["network"]["server-address"].Comment = new ConfigComment("Using the host name is also possible.");
+content["network"]["server-port"] = new ConfigValue();
+content["network"]["server-port"].Value = "45054";</code></pre>
+
+<p>
+After a configuration has been initialized successfully, it can be written into a file. How to write such a 
+configuration file is done as follows.
+</p>
+
+<pre><code>String filename = @"C:\config.ini";
+ConfigWriter.Write(content, filename);</code></pre>
+
+<p>
+With the above configuration, the written result would like as shown below.
+</p>
+
+<pre><code>[general] # The general section contains global values.
+enable-show-pages = yes
+enable-show-styles = no
+default-language = english # Using english, german and french is possible.
+
+[network] # The network section contains network values.
+server-address = 192.168.5.42 # Using the host name is also possible.
+server-port = 45054</code></pre>
+
+<p>
+On the other hand, the <i>Plexdata CFG Parser</i> also supports a configuration file header. 
+How to use this feature is explained right here.
+</p>
+
+<p>
+As done for the content, the header of a configuration file must be configured as well. Here below 
+please find the needed steps.
+</p>
+
+<pre><code>ConfigComment comment = new ConfigComment("header comment line 1");
+content.Header.Append(comment);
+comment = new ConfigComment("header comment line 2");
+content.Header.Append(comment);</code></pre>
+
+<p>
+After writing the above configuration, the written result would like as shown below.
+</p>
+
+<pre><code># header comment line 1
+# header comment line 2
+
+[section-1] 
+...</code></pre>
+
+<p>
+Related to the file header, two more details should be discussed. The first detail is t
+he usage of placeholders and the second detail is the usage of the default header.
+</p>
+
+<p>
+In conjunction with the configuration file header, it will be possible to include current 
+file name and/or current file date. How to use these placeholders is demonstrated below.  
+</p>
+
+<pre><code>ConfigComment comment = new ConfigComment($"File name: \"{ConfigDefines.FileNamePlaceholder}\"");
+content.Header.Append(comment);
+comment = new ConfigComment($"File date: \"{ConfigDefines.FileDatePlaceholder}\"");
+content.Header.Append(comment);</code></pre>
+
+<p>
+After writing the above configuration, the written result would like as shown below.
+</p>
+
+<pre><code># File name: "config.ini"
+# File date: "2018-10-29 17:42:23"
+
+[section-1] 
+...</code></pre>
+
+<p>
+The feature of having a default header is born because of the need of providing users with the 
+rules of how to use a configuration file. For this purpose class <code>ConfigSettings</code> 
+provides a static method named <code>CreateDefaultHeader()</code>. How to use this feature is 
+shown below.
+</p>
+
+<pre><code>ConfigContent content = new ConfigContent();
+content.Header = ConfigSettings.CreateDefaultHeader("Auto-generated configuration file.", true);</code></pre>
+
+<p>
+After writing the above configuration, the written result would like as shown below.
+</p>
+
+<pre><code>﻿# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Auto-generated configuration file.
+# File name: config.ini
+# File date: 2018-10-27 04:31:02
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Header rules:
+# - Each header line must start with a comment marker.
+# - Each of the header lines must be a pure comment line.
+# - Each header comment line must be in front on any other content.
+# Comment Rules:
+# - Comments can be tagged by character '#' or by character ';'.
+# - Comments can be placed in a single line but only as header type.
+# - Comments can be placed at the end of line of each section.
+# - Comments can be placed at the end of line of each value-data-pair.
+# Section Rules:
+# - Sections are enclosed in '[' and ']'.
+# - Section names should not include white spaces.
+# Value Rules:
+# - Values can have an empty data part.
+# - Value names should not include white spaces.
+# - Values without a section are treated as 'others'.
+# - Values are built as pair of 'name:data' or of 'name=data'.
+# - Value data that use '#', ';', '[', ']', ':' or '=' must be enclosed by '"'.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[section-1] 
+...</code></pre>
+
+<h2 id="parsing">Parsing</h2>
+
+<p>
+Another feature of the <i>Plexdata CFG Parser</i> is the possibility to put the content 
+of a read configuration file into a user&#8209;defined class structure. How to use this 
+functionality is part of this section.
+</p>
+
+<p>
+But before starting with an example some details should be discussed. The advantage of 
+this feature is the guarantee of type&#8209;safeness. This is indeed pretty important 
+because of otherwise each value must be converted manually. But on the other hand, the 
+disadvantage is that an additional implementation is required.
+</p>
+
+<p>
+As first it is necessary to implement its own class structure. The following code snippet 
+shows an example of such a class structure. Furthermore, is shows how to configure these 
+classes to be able to use the parsing feature.
+</p>
+
+<pre><code>public class GeneralSettings
+{
+    [ConfigValue("enable-show-pages", Default = "yes")]
+    public Boolean EnableShowPages { get; set; }
+    [ConfigValue("enable-show-styles", Default = "no")]
+    public Boolean EnableShowStyles { get; set; }
+    [ConfigValue("default-language", Comment = "Using english, german and french is possible.")]
+    public String DefaultLanguage { get; set; }
+    [ConfigIgnore]
+    public DateTime Timestamp { get; set; }
+}
+
+public class NetworkSettings
+{
+    [ConfigValue("server-address", Comment = "Usage of IPv4 or IPv6 is possible.")]
+    public IPAddress ServerAddress { get; set; }
+    [ConfigValue("server-port")]
+    public UInt16 ServerPort { get; set; }
+    [ConfigIgnore]
+    public DateTime Timestamp { get; set; }
+}
+
+public class ProgramSettings
+{
+    [ConfigSection("general", Comment = "The general section contains global values.")]
+    public GeneralSettings GeneralSettings { get; set; }
+    [ConfigSection("network", Comment = "The network section contains network values.")]
+    public NetworkSettings NetworkSettings { get; set; }
+}</code></pre>
+
+<p>
+With these setting classes in background, reading and parsing a configuration file can be done 
+like shown below.
+</p>
+
+<pre><code>String filename = @"C:\network.ini";
+ConfigContent content = ConfigReader.Read(filename);
+ProgramSettings settings = ConfigParser<ProgramSettings>.Parse(content);</code></pre>
+
+<h2 id="setup">Setup</h2>
+
+<p>
+Yet another feature of the <i>Plexdata CFG Parser</i> is the possibility to use a special 
+configuration. Unfortunately, only three types are supported at the moment. These are the 
+types for Unix&#8209;styled configuration files, for Windows&#8209;styled configuration files, 
+as well as a mixture of Unix&#8209;and Windows&#8209;style.
+</p>
+
+<p>
+Choosing a different configuration setting is pretty easy. The only thing to do is to apply a 
+new setting instance to the <code>Settings</code> property of class <code>ConfigSettings</code>. 
+Please see below for an example.
+</p>
+
+<pre><code>ConfigSettings.Settings = new ConfigSettingsUnix();</code></pre>
+
+<p>
+With the configuration used in section <a href="#writing">Writing</a> a written configuration 
+file would look like shown below.
+</p>
+
+<pre><code>﻿[general] # The general section contains global values.
+enable-show-pages: True
+enable-show-styles: False
+default-language: english # Using english, german and french is possible.
+
+[network] # The network section contains network values.
+server-address: 192.168.5.42 # Usage of IPv4 or IPv6 is possible.
+server-port: 45054</code></pre>
+
+<p>
+In this context, two things should be noted. As first the configuration settings must be changed
+before creating a new configuration content. Secondly, the configuration settings are only relevant 
+during writing a configuration file.
+</p>
+
+<p>
+More information about using the configuration settings as well as about all other details can be found inside 
+the complete API documentation. This API documentation is available as CHM file and can be downloaded from the 
+releases page on <a target="_blank" href="https://github.com/akesseler/Plexdata.CfgParser/releases">GitHub</a>.
 </p>
 
 <h2 id="limitation">Limitation</h2>
