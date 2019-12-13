@@ -5,6 +5,8 @@
 - Reduction of version number to three digits (**BREAKING CHANGES**).
 - Copyright year adjusted to 2019.
 - Support of class reference help for the Wiki.
+- Package release on `nuget.org`.
+- Release file uploaded on `github.com`.
 
 **1.0.0.1**
 - Package release on nuget.org
