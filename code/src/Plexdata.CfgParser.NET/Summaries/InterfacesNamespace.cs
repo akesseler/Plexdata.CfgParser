@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
-using System;
-
-namespace Plexdata.CfgParser.Tester
+namespace Plexdata.CfgParser.Interfaces
 {
-    class Program
-    {
-        static void Main(String[] args)
-        {
-            Console.WriteLine("Do something useful...");
-            Console.ReadKey();
-        }
-    }
+    /// <summary>
+    /// The <see cref="Plexdata.CfgParser.Interfaces"/> namespace contains all 
+    /// supported interfaces of the <i>Plexdata CFG Parser</i>.
+    /// </summary>
+    /// <remarks>
+    /// This namespace contains all general interface definitions. Interfaces 
+    /// are used for abstractions and generalisations.
+    /// </remarks>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc { }
 }

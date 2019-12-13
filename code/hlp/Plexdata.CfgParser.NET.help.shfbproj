@@ -13,13 +13,13 @@
     <RootNamespace>Documentation</RootNamespace>
     <Name>Documentation</Name>
     <!-- SHFB properties -->
-    <FrameworkVersion>.NET Framework 4.7.2</FrameworkVersion>
-    <OutputPath>chm\</OutputPath>
+    <FrameworkVersion>Cross-platform (.NET Core/.NET Standard)</FrameworkVersion>
+    <OutputPath>help\</OutputPath>
     <HtmlHelpName>Plexdata.CfgParser.NET</HtmlHelpName>
     <Language>en-US</Language>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\src\Plexdata.CfgParser.NET\bin\Release\Plexdata.CfgParser.NET.dll" />
-      <DocumentationSource sourceFile="..\src\Plexdata.CfgParser.NET\bin\Release\Plexdata.CfgParser.NET.xml" />
+      <DocumentationSource sourceFile="..\src\Plexdata.CfgParser.NET\bin\Release\netstandard2.0\Plexdata.CfgParser.NET.dll" />
+      <DocumentationSource sourceFile="..\src\Plexdata.CfgParser.NET\bin\Release\netstandard2.0\Plexdata.CfgParser.NET.xml" />
     </DocumentationSources>
     <HelpFileFormat>HtmlHelp1</HelpFileFormat>
     <SyntaxFilters>C#</SyntaxFilters>
@@ -30,7 +30,7 @@
     <IndentHtml>False</IndentHtml>
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <HelpTitle>Plexdata.CfgParser.NET</HelpTitle>
-    <HelpFileVersion>1.0.0.0</HelpFileVersion>
+    <HelpFileVersion>1.0.1</HelpFileVersion>
     <NamingMethod>Guid</NamingMethod>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <RootNamespaceContainer>True</RootNamespaceContainer>
@@ -78,28 +78,21 @@
       <Argument Key="baseSourceCodeUrl" Value="" />
       <Argument Key="requestExampleUrl" Value="" />
     </TransformComponentArguments>
-    <CopyrightText>Copyright &amp;#169%3b 2018 - plexdata.de</CopyrightText>
+    <CopyrightText>Copyright &amp;#169%3b 2019 - plexdata.de</CopyrightText>
     <CopyrightHref>http://www.plexdata.de/</CopyrightHref>
     <ProjectSummary>&amp;lt%3bp&amp;gt%3bThe CFG Parser represents a library that allows importing and exporting of CFG files. Also, it is possible to configure the importing and exporting behavior.&amp;lt%3b/p&amp;gt%3b
 &amp;lt%3bp&amp;gt%3bMain feature of this library is that configuration with different formats can be processed.&amp;lt%3b/p&amp;gt%3b
 &amp;lt%3bp&amp;gt%3bFinally, it would also be possible %28assuming a proper configuration is used%29 to write a CFG output in different formats.&amp;lt%3b/p&amp;gt%3b
 &amp;lt%3bp&amp;gt%3b&amp;lt%3bstrong&amp;gt%3bTarget Framework&amp;lt%3b/strong&amp;gt%3b&amp;lt%3b/p&amp;gt%3b
-&amp;lt%3bp&amp;gt%3bCurrent target framework of this library is the &amp;lt%3bi&amp;gt%3b.NET Framework v4.7.2&amp;lt%3b/i&amp;gt%3b.&amp;lt%3b/p&amp;gt%3b
+&amp;lt%3bp&amp;gt%3bCurrent target framework of this library is the &amp;lt%3bi&amp;gt%3b.NET Standard v2.0&amp;lt%3b/i&amp;gt%3b.&amp;lt%3b/p&amp;gt%3b
 &amp;lt%3bp&amp;gt%3b&amp;lt%3bstrong&amp;gt%3bLicense&amp;lt%3b/strong&amp;gt%3b&amp;lt%3b/p&amp;gt%3b
 &amp;lt%3bp&amp;gt%3bThe software has been published under the terms of &amp;lt%3ba target=&amp;quot%3b_blank&amp;quot%3b href=&amp;quot%3bhttp://www.plexdata.de/licenses/mit.html&amp;quot%3b&amp;gt%3bMIT License&amp;lt%3b/a&amp;gt%3b.&amp;lt%3b/p&amp;gt%3b</ProjectSummary>
     <FooterText>
     </FooterText>
     <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
     <NamespaceSummaries>
-      <NamespaceSummaryItem name="Plexdata.CfgParser.Constants" isDocumented="True">This namespace contains classes that define constant values which are used globally and internally.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Entities" isDocumented="True">This namespace contains various entity classes and each of them represents one specific configuration file part.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Extensions" isDocumented="True">The extension namespace contains general helper classes.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Interfaces" isDocumented="True">The interfaces namespace contains all general interface definitions.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Processors" isDocumented="True">The processors namespace contains all classes needed to load or save configuration files.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Settings" isDocumented="True">The settings namespace contains classes to be used to configure the behaviour of configuration file processing.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Attributes" isDocumented="True">This namespace contains classes that define attributes which are used globally and internally.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Converters" isDocumented="True">This namespace contains classes that define converters which are used globally and internally.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Plexdata.CfgParser.Internals" isDocumented="True">This namespace contains classes which are used internally only.</NamespaceSummaryItem></NamespaceSummaries>
+    </NamespaceSummaries>
+    <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
