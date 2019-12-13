@@ -1,4 +1,4 @@
-﻿/*
+/*
  * MIT License
  * 
  * Copyright (c) 2019 plexdata.de
@@ -22,16 +22,7 @@
  * SOFTWARE.
  */
 
-using System;
+using System.Runtime.CompilerServices;
 
-namespace Plexdata.CfgParser.Tester
-{
-    class Program
-    {
-        static void Main(String[] args)
-        {
-            Console.WriteLine("Do something useful...");
-            Console.ReadKey();
-        }
-    }
-}
+// Make internal classes visible for testing...
+[assembly: InternalsVisibleTo("Plexdata.CfgParser.NET.Tests")]

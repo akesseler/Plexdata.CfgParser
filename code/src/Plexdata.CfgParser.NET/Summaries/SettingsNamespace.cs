@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
-using System;
-
-namespace Plexdata.CfgParser.Tester
+namespace Plexdata.CfgParser.Settings
 {
-    class Program
-    {
-        static void Main(String[] args)
-        {
-            Console.WriteLine("Do something useful...");
-            Console.ReadKey();
-        }
-    }
+    /// <summary>
+    /// The <see cref="Plexdata.CfgParser.Settings"/> namespace contains all 
+    /// supported settings classes of the <i>Plexdata CFG Parser</i>.
+    /// </summary>
+    /// <remarks>
+    /// This namespace contains classes to be used to configure the behaviour 
+    /// of configuration file processing. 
+    /// </remarks>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc { }
 }

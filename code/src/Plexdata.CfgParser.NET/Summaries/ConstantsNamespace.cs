@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 
-using System;
-
-namespace Plexdata.CfgParser.Tester
+namespace Plexdata.CfgParser.Constants
 {
-    class Program
-    {
-        static void Main(String[] args)
-        {
-            Console.WriteLine("Do something useful...");
-            Console.ReadKey();
-        }
-    }
+    /// <summary>
+    /// The <see cref="Plexdata.CfgParser.Constants"/> namespace contains all 
+    /// supported constant values of the <i>Plexdata CFG Parser</i>.
+    /// </summary>
+    /// <remarks>
+    /// This namespace contains classes that define constant values which are 
+    /// used globally and internally. The constant values in this namespace are 
+    /// mainly necessary for parsing configuration files.
+    /// </remarks>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc { }
 }

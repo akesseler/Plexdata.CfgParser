@@ -22,16 +22,18 @@
  * SOFTWARE.
  */
 
-using System;
-
-namespace Plexdata.CfgParser.Tester
+namespace Plexdata.CfgParser.Entities
 {
-    class Program
-    {
-        static void Main(String[] args)
-        {
-            Console.WriteLine("Do something useful...");
-            Console.ReadKey();
-        }
-    }
+    /// <summary>
+    /// The <see cref="Plexdata.CfgParser.Entities"/> namespace contains all 
+    /// supported entity and model classes of the <i>Plexdata CFG Parser</i>.
+    /// </summary>
+    /// <remarks>
+    /// This namespace contains classes that represent entities and models 
+    /// which are used globally and internally. It contains various entity 
+    /// classes and each of them represents one specific configuration file 
+    /// part.
+    /// </remarks>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc { }
 }
