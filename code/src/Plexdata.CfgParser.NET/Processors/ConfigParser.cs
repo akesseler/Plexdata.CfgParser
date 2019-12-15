@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 
+using Plexdata.CfgParser.Attributes;
 using Plexdata.CfgParser.Converters;
 using Plexdata.CfgParser.Entities;
 using Plexdata.CfgParser.Internals;
+using Plexdata.CfgParser.Settings;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -180,6 +182,8 @@ namespace Plexdata.CfgParser.Processors
 
             ConfigContent result = new ConfigContent();
 
+            ConfigParser<TInstance>.ApplyConfigHeader(instance, result);
+
             foreach (SectionDescriptor current in DescriptorParser<TInstance>.ParseSections())
             {
                 PropertyInfo parent = instance.GetType().GetRuntimeProperty(current.Property.Name);
@@ -209,6 +213,54 @@ namespace Plexdata.CfgParser.Processors
         #endregion
 
         #region Private methods
+
+        /// <summary>
+        /// Tries to apply configuration header.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method tries to apply the configuration header.
+        /// </para>
+        /// <para>
+        /// But to be able to use this feature it is necessary to tag the 
+        /// top-level class of a configuration model with the class attribute 
+        /// <see cref="ConfigHeaderAttribute"/>. Otherwise, a configuration 
+        /// header is not used. 
+        /// </para>
+        /// <para>
+        /// Furthermore, this configuration header is only used as soon as 
+        /// converting an instance of <typeparamref name="TInstance"/> into 
+        /// its <see cref="ConfigContent"/> representation.
+        /// </para>
+        /// </remarks>
+        /// <param name="instance">
+        /// An instance of type <typeparamref name="TInstance"/>.
+        /// </param>
+        /// <param name="content">
+        /// The configuration content to assign the config header to.
+        /// </param>
+        /// <seealso cref="ConfigHeaderAttribute"/>
+        /// <see cref="ConfigParser{TInstance}.Parse(TInstance, CultureInfo)"/>
+        private static void ApplyConfigHeader(TInstance instance, ConfigContent content)
+        {
+            ConfigHeaderAttribute header = instance.GetType()
+                .GetCustomAttributes(typeof(ConfigHeaderAttribute), false)
+                .FirstOrDefault() as ConfigHeaderAttribute;
+
+            if (header is null)
+            {
+                return;
+            }
+
+            if (header.IsExtended)
+            {
+                content.Header = ConfigSettings.CreateExtendedHeader(header.Title, header.Placeholders);
+            }
+            else
+            {
+                content.Header = ConfigSettings.CreateStandardHeader(header.Title, header.Placeholders);
+            }
+        }
 
         /// <summary>
         /// This method tries parsing all values for a provided section.

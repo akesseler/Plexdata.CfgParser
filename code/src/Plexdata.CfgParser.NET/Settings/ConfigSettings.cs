@@ -162,29 +162,30 @@ namespace Plexdata.CfgParser.Settings
         #region Public static methods
 
         /// <summary>
-        /// This method creates the default header to be used in a configuration output.
+        /// Creates the default header to be used in a configuration output.
         /// </summary>
         /// <remarks>
-        /// The default header that is created by this method includes the set of rules 
-        /// to be followed that are shown to the users.
+        /// This method has been marked as deprecated. 
+        /// Use method <see cref="ConfigSettings.CreateExtendedHeader()"/> instead.
         /// </remarks>
         /// <returns>
         /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
         /// representing the header content.
         /// </returns>
-        /// <seealso cref="ConfigSettings.CreateDefaultHeader(String, Boolean)"/>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader()"/>
+        [Obsolete("This method is obsolete. Call `CreateExtendedHeader()` instead.")]
         public static ConfigHeader CreateDefaultHeader()
         {
-            return ConfigSettings.CreateDefaultHeader(null);
+            return ConfigSettings.CreateExtendedHeader();
         }
 
         /// <summary>
-        /// This method creates the default header to be used in a configuration output. 
+        /// Creates the default header to be used in a configuration output. 
         /// Further, the created header includes an additional title.
         /// </summary>
         /// <remarks>
-        /// The default header that is created by this method includes the set of rules 
-        /// to be followed as well as the title that are shown to the users.
+        /// This method has been marked as deprecated. 
+        /// Use method <see cref="ConfigSettings.CreateExtendedHeader(String)"/> instead.
         /// </remarks>
         /// <param name="title">
         /// The title to be used.
@@ -193,20 +194,21 @@ namespace Plexdata.CfgParser.Settings
         /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
         /// representing the header content.
         /// </returns>
-        /// <seealso cref="ConfigSettings.CreateDefaultHeader(String, Boolean)"/>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String)"/>
+        [Obsolete("This method is obsolete. Call `CreateExtendedHeader(String)` instead.")]
         public static ConfigHeader CreateDefaultHeader(String title)
         {
-            return ConfigSettings.CreateDefaultHeader(title, false);
+            return ConfigSettings.CreateExtendedHeader(title);
         }
 
         /// <summary>
-        /// This method creates the default header to be used in a configuration output. 
+        /// Creates the default header to be used in a configuration output. 
         /// Further, the created header includes additional lines with placeholders for 
         /// the file name and the file's creation date.
         /// </summary>
         /// <remarks>
-        /// The default header that is created by this method includes the set of rules 
-        /// to be followed as well as some placeholders that are shown to the users.
+        /// This method has been marked as deprecated. 
+        /// Use method <see cref="ConfigSettings.CreateExtendedHeader(Boolean)"/> instead.
         /// </remarks>
         /// <param name="placeholders">
         /// True to enable a usage of placeholders and false to disable it.
@@ -215,21 +217,21 @@ namespace Plexdata.CfgParser.Settings
         /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
         /// representing the header content.
         /// </returns>
-        /// <seealso cref="ConfigSettings.CreateDefaultHeader(String, Boolean)"/>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(Boolean)"/>
+        [Obsolete("This method is obsolete. Call `CreateExtendedHeader(Boolean)` instead.")]
         public static ConfigHeader CreateDefaultHeader(Boolean placeholders)
         {
-            return ConfigSettings.CreateDefaultHeader(null, placeholders);
+            return ConfigSettings.CreateExtendedHeader(placeholders);
         }
 
         /// <summary>
-        /// This method creates the default header to be used in a configuration output. 
+        /// Creates the default header to be used in a configuration output. 
         /// Further, the created header includes an additional title as well as additional 
         /// lines with placeholders for the file name and the file's creation date.
         /// </summary>
         /// <remarks>
-        /// Please be aware, no additional comment line is created if provided title is null, 
-        /// or empty, or contains whitespaces only. Also keep in mind, no additional comment 
-        /// lines are created with a disabled placeholder creation.
+        /// This method has been marked as deprecated. 
+        /// Use method <see cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/> instead.
         /// </remarks>
         /// <param name="title">
         /// The title to be used.
@@ -241,7 +243,108 @@ namespace Plexdata.CfgParser.Settings
         /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
         /// representing the header content.
         /// </returns>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/>
+        [Obsolete("This method is obsolete. Call `CreateExtendedHeader(String, Boolean)` instead.")]
         public static ConfigHeader CreateDefaultHeader(String title, Boolean placeholders)
+        {
+            return ConfigSettings.CreateExtendedHeader(title, placeholders);
+        }
+
+        /// <summary>
+        /// Creates the extended header to be used in configuration outputs.
+        /// </summary>
+        /// <remarks>
+        /// The extended header, that is created by this method, includes the set of rules 
+        /// to be followed by users when editing such a configuration file.
+        /// </remarks>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/>
+        public static ConfigHeader CreateExtendedHeader()
+        {
+            return ConfigSettings.CreateExtendedHeader(null, false);
+        }
+
+        /// <summary>
+        /// Creates the extended header to be used in a configuration output. Further, the 
+        /// created header includes an additional title.
+        /// </summary>
+        /// <remarks>
+        /// The extended header, that is created by this method, includes the set of rules 
+        /// to be followed by users when editing such a configuration file. Furthermore, 
+        /// the provided title is prepended.
+        /// </remarks>
+        /// <param name="title">
+        /// The title to be used.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/>
+        public static ConfigHeader CreateExtendedHeader(String title)
+        {
+            return ConfigSettings.CreateExtendedHeader(title, false);
+        }
+
+        /// <summary>
+        /// Creates the extended header to be used in a configuration output. Further, the 
+        /// created header includes additional lines with placeholders for the file name 
+        /// and the file's creation date.
+        /// </summary>
+        /// <remarks>
+        /// The extended header, that is created by this method, includes the set of rules 
+        /// to be followed by users when editing such a configuration file. Furthermore, 
+        /// some placeholders are prepended.
+        /// </remarks>
+        /// <param name="placeholders">
+        /// True to enable a usage of placeholders and false to disable it.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigDefines.FileNamePlaceholder"/>
+        /// <seealso cref="ConfigDefines.FileDatePlaceholder"/>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/>
+        public static ConfigHeader CreateExtendedHeader(Boolean placeholders)
+        {
+            return ConfigSettings.CreateExtendedHeader(null, placeholders);
+        }
+
+        /// <summary>
+        /// Creates the extended header to be used in a configuration output. Further, the 
+        /// created header includes an additional title as well as additional lines with 
+        /// placeholders for the file name and the file's creation date.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The extended header, that is created by this method, includes the set of rules 
+        /// to be followed by users when editing such a configuration file. Furthermore, 
+        /// the provided title as well as some placeholders are prepended.
+        /// </para>
+        /// <para>
+        /// Please be aware, no additional title line is prepended if provided title is 
+        /// null, or empty, or contains whitespaces only. Also keep in mind, no additional 
+        /// placeholder lines are prepended with disabled placeholder creation.
+        /// </para>
+        /// </remarks>
+        /// <param name="title">
+        /// The title to be used.
+        /// </param>
+        /// <param name="placeholders">
+        /// True to enable a usage of placeholders and false to disable it.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigDefines.FileNamePlaceholder"/>
+        /// <seealso cref="ConfigDefines.FileDatePlaceholder"/>
+        /// <seealso cref="ConfigSettings.CreateStandardHeader(String, Boolean)"/>
+        public static ConfigHeader CreateExtendedHeader(String title, Boolean placeholders)
         {
             ConfigHeader header = new ConfigHeader();
 
@@ -292,6 +395,103 @@ namespace Plexdata.CfgParser.Settings
             header.Append($"- Value data that use '{c1}', '{c2}', '{s1}', '{s2}', '{v1}' or '{v2}' must be enclosed by '{ConfigDefines.StringMarker}'.");
 
             header.Append($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+            return header;
+        }
+
+        /// <summary>
+        /// Creates the simplified header to be used in a configuration output. This header 
+        /// just contains the provided title.
+        /// </summary>
+        /// <remarks>
+        /// The simplified header, that is created by this method, just contains the provided 
+        /// title.
+        /// </remarks>
+        /// <param name="title">
+        /// The title to be used.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigSettings.CreateStandardHeader(String, Boolean)"/>
+        public static ConfigHeader CreateStandardHeader(String title)
+        {
+            return ConfigSettings.CreateStandardHeader(title, false);
+        }
+
+        /// <summary>
+        /// Creates the simplified header to be used in a configuration output. This header 
+        /// just contains some placeholders.
+        /// </summary>
+        /// <remarks>
+        /// The simplified header, that is created by this method, just contains some placeholders.
+        /// </remarks>
+        /// <param name="placeholders">
+        /// True to enable a usage of placeholders and false to disable it.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigDefines.FileNamePlaceholder"/>
+        /// <seealso cref="ConfigDefines.FileDatePlaceholder"/>
+        /// <seealso cref="ConfigSettings.CreateStandardHeader(String, Boolean)"/>
+        public static ConfigHeader CreateStandardHeader(Boolean placeholders)
+        {
+            return ConfigSettings.CreateStandardHeader(null, placeholders);
+        }
+
+        /// <summary>
+        /// Creates the simplified header to be used in a configuration output. This header 
+        /// contains the provided title as well as some placeholders.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// In contrast to the extended header, this header just contains an additional 
+        /// title as well as additional lines with placeholders for the file name and the 
+        /// file's creation date.
+        /// </para>
+        /// <para>
+        /// Please be aware, no additional title line is prepended if provided title is 
+        /// null, or empty, or contains whitespaces only. Also keep in mind, no additional 
+        /// placeholder lines are prepended with disabled placeholder creation.
+        /// </para>
+        /// </remarks>
+        /// <param name="title">
+        /// The title to be used.
+        /// </param>
+        /// <param name="placeholders">
+        /// True to enable a usage of placeholders and false to disable it.
+        /// </param>
+        /// <returns>
+        /// An instance of class <see cref="ConfigHeader"/> containing a list of comments 
+        /// representing the header content.
+        /// </returns>
+        /// <seealso cref="ConfigDefines.FileNamePlaceholder"/>
+        /// <seealso cref="ConfigDefines.FileDatePlaceholder"/>
+        /// <seealso cref="ConfigSettings.CreateExtendedHeader(String, Boolean)"/>
+        public static ConfigHeader CreateStandardHeader(String title, Boolean placeholders)
+        {
+            ConfigHeader header = new ConfigHeader();
+
+            if (!String.IsNullOrWhiteSpace(title))
+            {
+                header.Append($"{title.Trim()}");
+            }
+
+            if (placeholders)
+            {
+                header.Append($"File name: {ConfigDefines.FileNamePlaceholder}");
+                header.Append($"File date: {ConfigDefines.FileDatePlaceholder}");
+            }
+
+            if (header.Count > 0)
+            {
+                header.Insert(0, $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+                header.Append($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            }
 
             return header;
         }

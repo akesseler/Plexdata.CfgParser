@@ -14,9 +14,9 @@
     <Description>This .NET Standard library is a simple CFG/INI file parser. Main feature of this package is the possibility to parse INI file content directly into model classes, that are tagged by special attributes. Another feature of this package is the usage of different INI file formats, e.g. INI files in UNIX format (colon separated) or in Windows format (equal sign separated). A usage of mixed formats are also possible.</Description>
     <PackageTags>cfg ini file parser format UNIX Windows .NET Standard</PackageTags>
     <PackageReleaseNotes>See project history under https://github.com/akesseler/Plexdata.CfgParser/blob/master/code/src/HISTORY.md</PackageReleaseNotes>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
-    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <FileVersion>1.0.2</FileVersion>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -61,7 +61,7 @@ namespace Plexdata.CfgParser.Tests.Settings
         }
 
         [Test]
-        public void CreateDefaultHeader_WithoutTitleWithoutPlaceholders_ResultIs()
+        public void CreateExtendedHeader_WithoutTitleWithoutPlaceholders_ResultAsExpected()
         {
             String expected =
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
@@ -85,13 +85,13 @@ namespace Plexdata.CfgParser.Tests.Settings
                 $"# - Value data that use '#', ';', '[', ']', ':' or '=' must be enclosed by '\"'." +
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-            ConfigHeader header = ConfigSettings.CreateDefaultHeader();
+            ConfigHeader header = ConfigSettings.CreateExtendedHeader();
 
             Assert.AreEqual(expected, String.Join(String.Empty, header.ToOutput()));
         }
 
         [Test]
-        public void CreateDefaultHeader_WithTitleWithoutPlaceholders_ResultIs()
+        public void CreateExtendedHeader_WithTitleWithoutPlaceholders_ResultAsExpected()
         {
             String expected =
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
@@ -117,13 +117,13 @@ namespace Plexdata.CfgParser.Tests.Settings
                 $"# - Value data that use '#', ';', '[', ']', ':' or '=' must be enclosed by '\"'." +
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-            ConfigHeader header = ConfigSettings.CreateDefaultHeader("My funny title");
+            ConfigHeader header = ConfigSettings.CreateExtendedHeader("My funny title");
 
             Assert.AreEqual(expected, String.Join(String.Empty, header.ToOutput()));
         }
 
         [Test]
-        public void CreateDefaultHeader_WithoutTitleWithPlaceholders_ResultIs()
+        public void CreateExtendedHeader_WithoutTitleWithPlaceholders_ResultAsExpected()
         {
             String expected =
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
@@ -150,13 +150,13 @@ namespace Plexdata.CfgParser.Tests.Settings
                 $"# - Value data that use '#', ';', '[', ']', ':' or '=' must be enclosed by '\"'." +
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-            ConfigHeader header = ConfigSettings.CreateDefaultHeader(true);
+            ConfigHeader header = ConfigSettings.CreateExtendedHeader(true);
 
             Assert.AreEqual(expected, String.Join(String.Empty, header.ToOutput()));
         }
 
         [Test]
-        public void CreateDefaultHeader_WithTitleWithPlaceholders_ResultIs()
+        public void CreateExtendedHeader_WithTitleWithPlaceholders_ResultAsExpected()
         {
             String expected =
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
@@ -184,9 +184,65 @@ namespace Plexdata.CfgParser.Tests.Settings
                 $"# - Value data that use '#', ';', '[', ']', ':' or '=' must be enclosed by '\"'." +
                 $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-            ConfigHeader header = ConfigSettings.CreateDefaultHeader("My funny title", true);
+            ConfigHeader header = ConfigSettings.CreateExtendedHeader("My funny title", true);
 
             Assert.AreEqual(expected, String.Join(String.Empty, header.ToOutput()));
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase(" ")]
+        public void CreateStandardHeader_WithoutTitleWithoutPlaceholders_ResultAsExpected(String title)
+        {
+            ConfigHeader header = ConfigSettings.CreateStandardHeader(title);
+
+            Assert.That(String.Join(String.Empty, header.ToOutput()), Is.Empty);
+        }
+
+        [Test]
+        public void CreateStandardHeader_WithTitleWithoutPlaceholders_ResultAsExpected()
+        {
+            String expected =
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
+                $"# My funny title" +
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+            ConfigHeader header = ConfigSettings.CreateStandardHeader("My funny title");
+
+            Assert.That(String.Join(String.Empty, header.ToOutput()), Is.EqualTo(expected));
+        }
+
+        [Test]
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase(" ")]
+        public void CreateStandardHeader_WithoutTitleWithPlaceholders_ResultAsExpected(String title)
+        {
+            String expected =
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
+                $"# File name: {{file-name-placeholder}}" +
+                $"# File date: {{file-date-placeholder}}" +
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+            ConfigHeader header = ConfigSettings.CreateStandardHeader(title, true);
+
+            Assert.That(String.Join(String.Empty, header.ToOutput()), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CreateStandardHeader_WithTitleWithPlaceholders_ResultAsExpected()
+        {
+            String expected =
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
+                $"# My funny title" +
+                $"# File name: {{file-name-placeholder}}" +
+                $"# File date: {{file-date-placeholder}}" +
+                $"# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+            ConfigHeader header = ConfigSettings.CreateStandardHeader("My funny title", true);
+
+            Assert.That(String.Join(String.Empty, header.ToOutput()), Is.EqualTo(expected));
         }
     }
 }
