@@ -406,7 +406,7 @@ After writing the above configuration, the written result would like as shown be
 <pre><code>﻿# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Auto-generated configuration file.
 # File name: config.ini
-# File date: 2019-10-27 04:31:02
+# File date: 2019-10-29 17:42:23
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Header rules:
 # - Each header line must start with a comment marker.
@@ -430,6 +430,25 @@ After writing the above configuration, the written result would like as shown be
 
 [section-1] 
 ...</code></pre>
+
+<p>
+On the other hand, someone may want to use a header, but not this huge header from above. 
+For this purpose class <code>ConfigSettings</code> provides another static method named 
+<code>CreateStandardHeader()</code>. How to use this method is shown below.
+</p>
+
+<pre><code>ConfigContent content = new ConfigContent();
+content.Header = ConfigSettings.CreateStandardHeader("Do not change this file!", true);</code></pre>
+
+<p>
+After writing the above configuration, the written result would like as shown below.
+</p>
+
+<pre><code>﻿# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Do not change this file!
+# File name: config.ini
+# File date: 2019-10-29 17:42:23
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</code></pre>
 
 <h2 id="parsing">Parsing</h2>
 
@@ -474,6 +493,7 @@ public class NetworkSettings
     public DateTime Timestamp { get; set; }
 }
 
+[ConfigHeader(IsExtended = false, Title = "Do not change this file!", Placeholders = true)]
 public class ProgramSettings
 {
     [ConfigSection("general", Comment = "The general section contains global values.")]
@@ -489,7 +509,7 @@ like shown below.
 
 <pre><code>String filename = @"C:\network.ini";
 ConfigContent content = ConfigReader.Read(filename);
-ProgramSettings settings = ConfigParser<ProgramSettings>.Parse(content);</code></pre>
+ProgramSettings settings = ConfigParser&lt;ProgramSettings&gt;.Parse(content);</code></pre>
 
 <h2 id="setup">Setup</h2>
 
@@ -559,6 +579,11 @@ Creating a configuration from scratch or reading an existing configuration file 
 when writing it back to disk. Please see section <a href="#losing-content">Losing File Content</a> 
 below for more information.
 </li>
+<li>
+Usage of class attribute <code>ConfigHeader</code> may overwrite header information in already existing 
+configuration files. Please see section <a href="#config-header">Config Header Attribute</a> below for 
+more information.
+</li>
 </ul>
 
 <h2 id="known-issues">Known Issues</h2>
@@ -600,6 +625,15 @@ configuration file.
 The complete content of an already existing file is disposed as soon as a configuration content 
 is written back to this file. This means, it is impossible to selectively update only the data 
 that have been changed.
+</p>
+
+<h3 id="config-header">Config Header Attribute</h3>
+<p>
+As mentioned above, the usage of class attribute <code>ConfigHeader</code> may overwrite header 
+information in already existing configuration files. This problem could come to light if for example 
+an already existing is configuration file was read and has been parsed into a user-defined model class 
+and this class is saved into the same configuration file afterwards. In such a case and with enabled 
+header generation the previously used file header will be replaced by the automatically created header.
 </p>
 
 </div>

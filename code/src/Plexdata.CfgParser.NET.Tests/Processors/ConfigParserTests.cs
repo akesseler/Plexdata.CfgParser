@@ -165,6 +165,33 @@ namespace Plexdata.CfgParser.Tests.Processors
             public SmokeTestSectionTwo Section2 { get; set; }
         }
 
+        [ConfigHeader]
+        private class ConfigHeaderTestClassPlain { }
+
+        [ConfigHeader(IsExtended = true)]
+        private class ConfigHeaderTestClassDefaultTrue { }
+
+        [ConfigHeader(IsExtended = false)]
+        private class ConfigHeaderTestClassDefaultFalse { }
+
+        [ConfigHeader(IsExtended = true, Title = "test title", Placeholders = false)]
+        private class ConfigHeaderTestClassDefaultTrueWithTitleWithoutPlaceholders { }
+
+        [ConfigHeader(IsExtended = false, Title = "test title", Placeholders = false)]
+        private class ConfigHeaderTestClassDefaultFalseWithTitleWithoutPlaceholders { }
+
+        [ConfigHeader(IsExtended = true, Title = null, Placeholders = true)]
+        private class ConfigHeaderTestClassDefaultTrueWithoutTitleWithPlaceholders { }
+
+        [ConfigHeader(IsExtended = false, Title = null, Placeholders = true)]
+        private class ConfigHeaderTestClassDefaultFalseWithoutTitleWithPlaceholders { }
+
+        [ConfigHeader(IsExtended = true, Title = "test title", Placeholders = true)]
+        private class ConfigHeaderTestClassDefaultTrueWithTitleWithPlaceholders { }
+
+        [ConfigHeader(IsExtended = false, Title = "test title", Placeholders = true)]
+        private class ConfigHeaderTestClassDefaultFalseWithTitleWithPlaceholders { }
+
         #endregion
 
         #region From content into instance.
@@ -363,6 +390,103 @@ namespace Plexdata.CfgParser.Tests.Processors
             Assert.That(actual.Header.IsValid, Is.False);
             Assert.That(actual.Sections.Count(), Is.EqualTo(1));
             Assert.That(actual.Sections.First().Values.Count(), Is.EqualTo(1));
+        }
+
+        #endregion
+
+        #region Config header tests.
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassPlain_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassPlain>.Parse(new ConfigHeaderTestClassPlain());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(20));
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultTrue_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultTrue>.Parse(new ConfigHeaderTestClassDefaultTrue());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(20));
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultFalse_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultFalse>.Parse(new ConfigHeaderTestClassDefaultFalse());
+
+            Assert.That(actual.Header.IsValid, Is.False);
+            Assert.That(actual.Header.Comments.Count(), Is.Zero);
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultTrueWithTitleWithoutPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultTrueWithTitleWithoutPlaceholders>.Parse(new ConfigHeaderTestClassDefaultTrueWithTitleWithoutPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(22));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text, Is.EqualTo("test title"));
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultFalseWithTitleWithoutPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultFalseWithTitleWithoutPlaceholders>.Parse(new ConfigHeaderTestClassDefaultFalseWithTitleWithoutPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(3));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text, Is.EqualTo("test title"));
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultTrueWithoutTitleWithPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultTrueWithoutTitleWithPlaceholders>.Parse(new ConfigHeaderTestClassDefaultTrueWithoutTitleWithPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(23));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text.StartsWith("File name: "), Is.True);
+            Assert.That(actual.Header.Comments.ToArray()[2].Text.StartsWith("File date: "), Is.True);
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultFalseWithoutTitleWithPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultFalseWithoutTitleWithPlaceholders>.Parse(new ConfigHeaderTestClassDefaultFalseWithoutTitleWithPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(4));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text.StartsWith("File name: "), Is.True);
+            Assert.That(actual.Header.Comments.ToArray()[2].Text.StartsWith("File date: "), Is.True);
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultTrueWithTitleWithPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultTrueWithTitleWithPlaceholders>.Parse(new ConfigHeaderTestClassDefaultTrueWithTitleWithPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(24));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text, Is.EqualTo("test title"));
+            Assert.That(actual.Header.Comments.ToArray()[2].Text.StartsWith("File name: "), Is.True);
+            Assert.That(actual.Header.Comments.ToArray()[3].Text.StartsWith("File date: "), Is.True);
+        }
+
+        [Test]
+        public void Parse_ConfigHeaderTestClassDefaultFalseWithTitleWithPlaceholders_ResultAsExpected()
+        {
+            ConfigContent actual = ConfigParser<ConfigHeaderTestClassDefaultFalseWithTitleWithPlaceholders>.Parse(new ConfigHeaderTestClassDefaultFalseWithTitleWithPlaceholders());
+
+            Assert.That(actual.Header.IsValid, Is.True);
+            Assert.That(actual.Header.Comments.Count(), Is.EqualTo(5));
+            Assert.That(actual.Header.Comments.ToArray()[1].Text, Is.EqualTo("test title"));
+            Assert.That(actual.Header.Comments.ToArray()[2].Text.StartsWith("File name: "), Is.True);
+            Assert.That(actual.Header.Comments.ToArray()[3].Text.StartsWith("File date: "), Is.True);
         }
 
         #endregion
