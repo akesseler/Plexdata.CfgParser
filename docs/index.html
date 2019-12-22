@@ -75,6 +75,7 @@ tbody tr:nth-child(odd){
   <a href="#writing">Writing</a>
   <a href="#parsing">Parsing</a>
   <a href="#setup">Setup</a>
+  <a href="#data-types">Data Types</a>
   <a href="#limitation">Limitation</a>
   <a href="#known-issues">Known Issues</a>
 </div>
@@ -403,7 +404,7 @@ content.Header = ConfigSettings.CreateDefaultHeader("Auto-generated configuratio
 After writing the above configuration, the written result would like as shown below.
 </p>
 
-<pre><code>﻿# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<pre><code># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Auto-generated configuration file.
 # File name: config.ini
 # File date: 2019-10-29 17:42:23
@@ -444,7 +445,7 @@ content.Header = ConfigSettings.CreateStandardHeader("Do not change this file!",
 After writing the above configuration, the written result would like as shown below.
 </p>
 
-<pre><code>﻿# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<pre><code># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Do not change this file!
 # File name: config.ini
 # File date: 2019-10-29 17:42:23
@@ -458,6 +459,8 @@ of a read configuration file into a user&#8209;defined class structure. How to u
 functionality is part of this section.
 </p>
 
+<h3 id="standard-parsing">Standard Parsing</h3>
+
 <p>
 But before starting with an example some details should be discussed. The advantage of 
 this feature is the guarantee of type&#8209;safeness. This is indeed pretty important 
@@ -467,8 +470,8 @@ disadvantage is that an additional implementation is required.
 
 <p>
 As first it is necessary to implement its own class structure. The following code snippet 
-shows an example of such a class structure. Furthermore, is shows how to configure these 
-classes to be able to use the parsing feature.
+shows an example of such a class structure. Further is shows how to configure these classes 
+to be able to use the parsing feature.
 </p>
 
 <pre><code>public class GeneralSettings
@@ -511,13 +514,104 @@ like shown below.
 ConfigContent content = ConfigReader.Read(filename);
 ProgramSettings settings = ConfigParser&lt;ProgramSettings&gt;.Parse(content);</code></pre>
 
+<h3 id="custom-parsing">Custom Parsing</h3>
+
+<p>
+In addition to the above, it is possible to setup a configuration class structure that can 
+process custom types. For this purpose the <i>Plexdata CFG Parser</i> provides an interface 
+called <code>ICustomParser&lt;TType&gt;</code>. This interface must be implemented by users. 
+Thereafter, this user&#8209;defined interface implementation can be used simply by tagging 
+the related property with attribute <code>CustomParser</code>. Here are the steps required 
+to accomplish this task.
+</p>
+
+<p>
+First of all, a suitable custom type is needed. It is possible to implement anything wanted. 
+The code snippet below shows an example of such a custom type.
+</p>
+
+<pre><code>public class CustomType
+{
+    public Int32 Value1 { get; set; }
+    public Int32 Value2 { get; set; }
+    public Int32 Value3 { get; set; }
+    public Int32 Value4 { get; set; }
+}</code></pre>
+
+<p>
+As next, the above mentioned interface <code>ICustomParser&lt;TType&gt;</code> should be 
+implemented. How to do this is demonstrated in code snippet below.
+</p>
+
+<pre><code>public class CustomTypeParser : ICustomParser&lt;CustomType&gt;
+{
+    // Called when reading a configuration takes place.
+    public CustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+    {
+        String[] items = value.Split(',');
+
+        if (items.Length != 4)
+        {
+            throw new FormatException("Custom type must contain four items.");
+        }
+
+        return new CustomType
+        {
+            Value1 = Convert.ToInt32(items[0].Trim()),
+            Value2 = Convert.ToInt32(items[1].Trim()),
+            Value3 = Convert.ToInt32(items[2].Trim()),
+            Value4 = Convert.ToInt32(items[3].Trim())
+        };
+    }
+
+    // Called when writing a configuration takes place.
+    public String Parse(String label, CustomType value, Object fallback, CultureInfo culture)
+    {
+        return $"{value.Value1},{value.Value2},{value.Value3},{value.Value4}";
+    }
+}</code></pre>
+
+<p>
+Now it would be useful to implement all classes representing the whole configuration content.
+This is pretty much alike as shown in section above. The only exception is the usage of attribute 
+<code>CustomParser</code> for all custom types. Here below a very simple example implementation 
+of that class structure.
+</p>
+
+<pre><code>public class CustomSection
+{
+    [ConfigValue]
+    <strong>[CustomParser(typeof(CustomTypeParser))]</strong>
+    public CustomType CustomValue { get; set; }
+}
+
+public class CustomConfig
+{
+    [ConfigSection]
+    public CustomSection Section1 { get; set; }
+}</code></pre>
+
+<p>
+The example above includes one highlighted line of code. This code line shows that attribute 
+<code>CustomParser</code> gets a parameter representing the type of a user&#8209;defined 
+implementation of interface <code>ICustomParser&lt;TType&gt;</code>. That&rsquo;s it.
+</p>
+
+<p>
+With all these information in mind, reading and parsing a fitting configuration file would look like shown below.
+</p>
+
+<pre><code>String filename = @"C:\custom-type.ini";
+ConfigContent content = ConfigReader.Read(filename);
+CustomConfig settings = ConfigParser&lt;CustomConfig&gt;.Parse(content);</code></pre>
+
 <h2 id="setup">Setup</h2>
 
 <p>
 Yet another feature of the <i>Plexdata CFG Parser</i> is the possibility to use a special 
 configuration. Unfortunately, only three types are supported at the moment. These are the 
-types for Unix&#8209;styled configuration files, for Windows&#8209;styled configuration files, 
-as well as a mixture of Unix&#8209;and Windows&#8209;style.
+types for Unix&#8209;styled configuration files, for Windows&#8209;styled configuration files 
+as well as a mixture of Unix&#8209;style and Windows&#8209;style.
 </p>
 
 <p>
@@ -533,7 +627,7 @@ With the configuration used in section <a href="#writing">Writing</a> a written 
 file would look like shown below.
 </p>
 
-<pre><code>﻿[general] # The general section contains global values.
+<pre><code>[general] # The general section contains global values.
 enable-show-pages: True
 enable-show-styles: False
 default-language: english # Using english, german and french is possible.
@@ -552,6 +646,24 @@ during writing a configuration file.
 More information about using the configuration settings as well as about all other details can be found inside 
 the complete API documentation. This API documentation is available as CHM file and can be downloaded from the 
 releases page on <a target="_blank" href="https://github.com/akesseler/Plexdata.CfgParser/releases">GitHub</a>.
+</p>
+
+<h2 id="data-types">Data Types</h2>
+
+<p>
+The integrated <i>Value Converter</i> supports <code>String</code>, <code>Version</code>, <code>IPAddress</code>, 
+<code>Char</code>, <code>Char?</code>, <code>Boolean</code>, <code>Boolean?</code>, <code>SByte</code>, 
+<code>SByte?</code>, <code>Byte</code>, <code>Byte?</code>, <code>Int16</code>, <code>Int16?</code>, 
+<code>UInt16</code>, <code>UInt16?</code>, <code>Int32</code>, <code>Int32?</code>, <code>UInt32</code>, 
+<code>UInt32?</code>, <code>Int64</code>, <code>Int64?</code>, <code>UInt64</code>, <code>UInt64?</code>, 
+<code>DateTime</code>, <code>DateTime?</code>, <code>Decimal</code>, <code>Decimal?</code>, <code>Double</code>, 
+<code>Double?</code>, <code>Single</code>, <code>Single?</code>, <code>Guid</code>, <code>Guid?</code> 
+as well as <code>Enum</code> types.
+</p>
+
+<p>
+It is also possible to convert any other type by implementing interface <code>ICustomParser&lt;TType&gt;</code> 
+accordingly.
 </p>
 
 <h2 id="limitation">Limitation</h2>

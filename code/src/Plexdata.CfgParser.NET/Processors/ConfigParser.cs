@@ -25,6 +25,8 @@
 using Plexdata.CfgParser.Attributes;
 using Plexdata.CfgParser.Converters;
 using Plexdata.CfgParser.Entities;
+using Plexdata.CfgParser.Exceptions;
+using Plexdata.CfgParser.Interfaces;
 using Plexdata.CfgParser.Internals;
 using Plexdata.CfgParser.Settings;
 using System;
@@ -284,6 +286,7 @@ namespace Plexdata.CfgParser.Processors
         /// <exception cref="Exception">
         /// Any other exception might be possible.
         /// </exception>
+        /// <seealso cref="ConfigParser{TInstance}.TryInvokeParseFrom(Object, PropertyInfo, String, String, Object, CultureInfo)"/>
         private static void ParseSection(TInstance instance, SectionDescriptor parent, ConfigSection section, CultureInfo culture)
         {
             Object target = ConfigParser<TInstance>.ConstructObject(parent.Property.PropertyType);
@@ -296,6 +299,11 @@ namespace Plexdata.CfgParser.Processors
                 if (value == null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Value \"{current.Descriptor}\" not found.");
+                    continue;
+                }
+
+                if (ConfigParser<TInstance>.TryInvokeParseFrom(target, current.Property, value.Label, value.Value, current.Attribute.Default, culture))
+                {
                     continue;
                 }
 
@@ -332,7 +340,7 @@ namespace Plexdata.CfgParser.Processors
         /// </exception>
         private static TInstance ConstructInstance()
         {
-            ConstructorInfo ctor = typeof(TInstance).GetConstructor(new Type[] { });
+            ConstructorInfo ctor = typeof(TInstance).GetConstructor(Type.EmptyTypes);
 
             if (ctor == null)
             {
@@ -373,7 +381,7 @@ namespace Plexdata.CfgParser.Processors
         /// </exception>
         private static Object ConstructObject(Type type)
         {
-            ConstructorInfo ctor = type.GetConstructor(new Type[] { });
+            ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
 
             if (ctor == null)
             {
@@ -389,6 +397,67 @@ namespace Plexdata.CfgParser.Processors
             {
                 throw new InvalidOperationException($"Could not use standard constructor of type \"{type.Name}\".", exception);
             }
+        }
+
+        /// <summary>
+        /// This method tries to create a new instance of a custom type converter and returns it.
+        /// </summary>
+        /// <remarks>
+        /// The provided parameter property must have an attribute of type <see cref="CustomParserAttribute"/> 
+        /// and its instance type of that attribute must be derived from interface <see cref="ICustomParser{TType}"/>.
+        /// Furthermore, the type of the interface implementation must be the same type as the type of the 
+        /// corresponding property.
+        /// </remarks>
+        /// <param name="property">
+        /// The property information to construct a converter instance for.
+        /// </param>
+        /// <returns>
+        /// An instance of the custom type parser/converter or <c>null</c> if no attribute is assigned 
+        /// or if applied parser type is not derived from interface <see cref="ICustomParser{TType}"/> 
+        /// or in case of a wrong interface type or in any error case (for example if no default constructor 
+        /// is defined).
+        /// </returns>
+        private static Object ConstructConverter(PropertyInfo property)
+        {
+            foreach (Attribute attribute in property.GetCustomAttributes())
+            {
+                if (attribute is CustomParserAttribute converter)
+                {
+                    if (converter.Instance is null)
+                    {
+                        continue;
+                    }
+
+                    foreach (Type realization in converter.Instance.GetInterfaces())
+                    {
+                        if (!realization.IsInterface) { continue; } // Well, safety first...
+                        if (!realization.IsGenericType) { continue; }
+                        if (realization.GetGenericTypeDefinition() != typeof(ICustomParser<>)) { continue; }
+                        if (!realization.GetGenericArguments().Any(x => x == property.PropertyType)) { continue; }
+
+                        // A parameterless constructor is always returned by this method, 
+                        // no matter if none is defined or the defined one is private.
+                        ConstructorInfo ctor = converter.Instance.GetConstructor(Type.EmptyTypes);
+
+                        if (ctor == null)
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            // According to docs: Either an exceptions is thrown or an instance is returned (but not null)...
+                            return ctor.Invoke(new Object[] { });
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -448,6 +517,7 @@ namespace Plexdata.CfgParser.Processors
         /// <returns>
         /// A new instance of a configuration value.
         /// </returns>
+        /// <seealso cref="ConfigParser{TInstance}.TryInvokeParseInto(Object, ValueDescriptor, CultureInfo, out String)"/>
         private static ConfigValue CreateConfigValue(SectionDescriptor section, Object source, PropertyInfo property, CultureInfo culture)
         {
             ValueDescriptor value = ConfigParser<TInstance>.TryFindValueDescriptor(section.Values, property);
@@ -462,7 +532,10 @@ namespace Plexdata.CfgParser.Processors
                 return null;
             }
 
-            String result = ConfigParser<TInstance>.ValueToString(source, property, value.Attribute.Default, culture);
+            if (!ConfigParser<TInstance>.TryInvokeParseInto(source, value, culture, out String result))
+            {
+                result = ConfigParser<TInstance>.ValueToString(source, property, value.Attribute.Default, culture);
+            }
 
             return new ConfigValue(value.Descriptor, result, value.Attribute.Comment);
         }
@@ -581,6 +654,160 @@ namespace Plexdata.CfgParser.Processors
         private static ValueDescriptor TryFindValueDescriptor(IList<ValueDescriptor> values, PropertyInfo source)
         {
             return values.Where(x => String.Equals(x.Property.Name, source.Name)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Tries to invoke method <see cref="ICustomParser{TType}.Parse(String, String, Object, CultureInfo)"/> 
+        /// of interface <see cref="ICustomParser{TType}"/> while reading a configuration takes place.
+        /// </summary>
+        /// <remarks>
+        /// This method tries to invoke method <see cref="ICustomParser{TType}.Parse(String, String, Object, CultureInfo)"/> 
+        /// of interface <see cref="ICustomParser{TType}"/> while reading a configuration takes place.
+        /// </remarks>
+        /// <param name="target">
+        /// The object (parent) to set converted property value.
+        /// </param>
+        /// <param name="property">
+        /// The property information to construct a converter instance for.
+        /// </param>
+        /// <param name="label">
+        /// The `label` of corresponding configuration value.
+        /// </param>
+        /// <param name="value">
+        /// The actual `value` of corresponding configuration value.
+        /// </param>
+        /// <param name="fallback">
+        /// The `fallback` (the default value) of corresponding configuration value.
+        /// </param>
+        /// <param name="culture">
+        /// The `culture` to be used for value type conversion.
+        /// </param>
+        /// <returns>
+        /// True, if invoking value parsing and applying the property was successful and 
+        /// false if no converter or no parsing method could be found.
+        /// </returns>
+        /// <exception cref="CustomParserException">
+        /// This exception is thrown if parsing invocation has caused any type of error. 
+        /// This could be for example a user-defined exception (thrown by user in the 
+        /// parsing method) or any type of exception caused by the underlying system.
+        /// </exception>
+        /// <seealso cref="ConfigParser{TInstance}.ConstructConverter(PropertyInfo)"/>
+        /// <seealso cref="ICustomParser{TType}.Parse(String, String, Object, CultureInfo)"/>
+        /// <seealso cref="TryInvokeParseInto(Object, ValueDescriptor, CultureInfo, out String)"/>
+        private static Boolean TryInvokeParseFrom(Object target, PropertyInfo property, String label, String value, Object fallback, CultureInfo culture)
+        {
+            Object converter = ConfigParser<TInstance>.ConstructConverter(property);
+
+            if (converter is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                MethodInfo method = converter.GetType().GetMethod(
+                    nameof(ICustomParser<Object>.Parse),
+                    new Type[] { typeof(String), typeof(String), typeof(Object), typeof(CultureInfo) }
+                );
+
+                if (method is null)
+                {
+                    return false;
+                }
+
+                property.SetValue(target, method.Invoke(converter, new Object[] { label, value, fallback, culture }));
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                if (exception.InnerException is CustomParserException)
+                {
+                    throw exception.InnerException;
+                }
+                else
+                {
+                    throw new CustomParserException(label, value,
+                        $"Unable to parse value of type `{property.PropertyType.Name}`. See inner exception for more details.",
+                        exception is TargetInvocationException ? exception.InnerException : exception
+                    );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tries to invoke method <see cref="ICustomParser{TType}.Parse(String, TType, Object, CultureInfo)"/> 
+        /// of interface <see cref="ICustomParser{TType}"/> while reading a configuration takes place.
+        /// </summary>
+        /// <remarks>
+        /// This method tries to invoke method <see cref="ICustomParser{TType}.Parse(String, TType, Object, CultureInfo)"/> 
+        /// of interface <see cref="ICustomParser{TType}"/> while reading a configuration takes place.
+        /// </remarks>
+        /// <param name="target">
+        /// The object (parent) to get property value to be converted.
+        /// </param>
+        /// <param name="descriptor">
+        /// The value descriptor retrieve all required information from. This is for example the 
+        /// `label` and the `fallback` to be used as method arguments.
+        /// </param>
+        /// <param name="culture">
+        /// The `culture` to be used for value type conversion.
+        /// </param>
+        /// <param name="result">
+        /// The string representing the converted custom type content to be put into a configuration.
+        /// </param>
+        /// <returns>
+        /// True, if reading the property and invoking value parsing was successful and 
+        /// false if no converter or no parsing method could be found.
+        /// </returns>
+        /// <exception cref="CustomParserException">
+        /// This exception is thrown if parsing invocation has caused any type of error. 
+        /// This could be for example a user-defined exception (thrown by user in the 
+        /// parsing method) or any type of exception caused by the underlying system.
+        /// </exception>
+        /// <seealso cref="ConfigParser{TInstance}.ConstructConverter(PropertyInfo)"/>
+        /// <seealso cref="ICustomParser{TType}.Parse(String, TType, Object, CultureInfo)"/>
+        /// <seealso cref="TryInvokeParseFrom(Object, PropertyInfo, String, String, Object, CultureInfo)"/>
+        private static Boolean TryInvokeParseInto(Object target, ValueDescriptor descriptor, CultureInfo culture, out String result)
+        {
+            result = null;
+
+            Object converter = ConfigParser<TInstance>.ConstructConverter(descriptor.Property);
+
+            if (converter is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                MethodInfo method = converter.GetType().GetMethod(
+                    nameof(ICustomParser<Object>.Parse),
+                    new Type[] { typeof(String), descriptor.Property.PropertyType, typeof(Object), typeof(CultureInfo) });
+
+                if (method is null)
+                {
+                    return false;
+                }
+
+                result = method.Invoke(converter, new Object[] { descriptor.Descriptor, descriptor.Property.GetValue(target), descriptor.Attribute.Default, culture }) as String;
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                if (exception.InnerException is CustomParserException)
+                {
+                    throw exception.InnerException;
+                }
+                else
+                {
+                    throw new CustomParserException(descriptor.Descriptor, null,
+                        $"Unable to parse value of type `{descriptor.Property.PropertyType.Name}`. See inner exception for more details.",
+                        exception is TargetInvocationException ? exception.InnerException : exception
+                    );
+                }
+            }
         }
 
         #endregion
