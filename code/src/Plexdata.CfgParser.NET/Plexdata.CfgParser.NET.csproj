@@ -11,12 +11,12 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/akesseler/Plexdata.CfgParser</PackageProjectUrl>
     <PackageIconUrl>https://github.com/akesseler/Plexdata.CfgParser/blob/master/icon.png?raw=true</PackageIconUrl>
-    <Description>This .NET Standard library is a simple CFG/INI file parser. Main feature of this package is the possibility to parse INI file content directly into model classes, that are tagged by special attributes. Another feature of this package is the usage of different INI file formats, e.g. INI files in UNIX format (colon separated) or in Windows format (equal sign separated). A usage of mixed formats are also possible.</Description>
-    <PackageTags>cfg ini file parser format UNIX Windows .NET Standard</PackageTags>
+    <Description>This .NET Standard library is a simple CFG/INI file parser. Main feature of this package is the possibility to parse INI file content directly into model classes, that are tagged by special attributes. Another feature of this package is the usage of different INI file formats, e.g. INI files in UNIX format (colon separated) or in Windows format (equal sign separated). A usage of mixed formats are also possible. Processing of standard framework types as well as of custom data types is possible as well.</Description>
+    <PackageTags>CFG INI config configuration file parser format UNIX Linux Windows .NET Standard</PackageTags>
     <PackageReleaseNotes>See project history under https://github.com/akesseler/Plexdata.CfgParser/blob/master/code/src/HISTORY.md</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
-    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -1,5 +1,13 @@
 
 
+**1.0.3**
+- Introduction of interface `ICustomParser<TType>`.
+- Unit tests reviewed and extended.
+- Source code documentation as well as online documentation reviewed and extended.
+- Version number increased.
+- Package release on `nuget.org`.
+- Wiki and release update on _GitHub_.
+
 **1.0.2**
 - Introduction of `ConfigHeader` attribute.
 - Method `CreateDefaultHeader` marked as deprecated.

@@ -25,10 +25,14 @@
 using NUnit.Framework;
 using Plexdata.CfgParser.Attributes;
 using Plexdata.CfgParser.Entities;
+using Plexdata.CfgParser.Exceptions;
+using Plexdata.CfgParser.Interfaces;
 using Plexdata.CfgParser.Processors;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Plexdata.CfgParser.Tests.Processors
 {
@@ -488,6 +492,438 @@ namespace Plexdata.CfgParser.Tests.Processors
             Assert.That(actual.Header.Comments.ToArray()[2].Text.StartsWith("File name: "), Is.True);
             Assert.That(actual.Header.Comments.ToArray()[3].Text.StartsWith("File date: "), Is.True);
         }
+
+        #endregion
+
+        #region Custom parser tests.
+
+        public class TestCustomType
+        {
+            public TestCustomType()
+            {
+                this.Value1 = 111;
+                this.Value2 = 222;
+            }
+
+            public Int32 Value1 { get; set; }
+            public Int32 Value2 { get; set; }
+
+            public override String ToString()
+            {
+                return "CustomParserTypeToString";
+            }
+        }
+
+        private static readonly String CustomParserTestContent = $"[Section1]{Environment.NewLine}Complex1=23,42{Environment.NewLine}";
+
+        #region CustomParserSectionNoParser
+
+        private class CustomParserConfigNoParser
+        {
+            [ConfigSection]
+            public CustomParserSectionNoParser Section1 { get; set; }
+        }
+
+        private class CustomParserSectionNoParser
+        {
+            [ConfigValue]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserConfigNoParser_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigNoParser actual = ConfigParser<CustomParserConfigNoParser>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionNullParser
+
+        private class CustomParserConfigNullParser
+        {
+            [ConfigSection]
+            public CustomParserSectionNullParser Section1 { get; set; }
+        }
+
+        private class CustomParserSectionNullParser
+        {
+            [ConfigValue]
+            [CustomParser(null)]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionNullParser_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigNullParser actual = ConfigParser<CustomParserConfigNullParser>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionWrongParser
+
+        private class CustomParserConfigWrongParser
+        {
+            [ConfigSection]
+            public CustomParserSectionWrongParser Section1 { get; set; }
+        }
+
+        private class CustomParserSectionWrongParser
+        {
+            [ConfigValue]
+            [CustomParser(typeof(String))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionWrongParser_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigWrongParser actual = ConfigParser<CustomParserConfigWrongParser>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionWrongInterface
+
+        private interface IWrongInterface { }
+
+        private class WrongInterface : IWrongInterface { }
+
+        private class CustomParserConfigWrongInterface
+        {
+            [ConfigSection]
+            public CustomParserSectionWrongInterface Section1 { get; set; }
+        }
+
+        private class CustomParserSectionWrongInterface
+        {
+            [ConfigValue]
+            [CustomParser(typeof(WrongInterface))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionWrongInterface_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigWrongInterface actual = ConfigParser<CustomParserConfigWrongInterface>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionWrongPropertyType
+
+        private class WrongPropertyType : ICustomParser<DateTime>
+        {
+            public DateTime Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
+
+            public String Parse(String label, DateTime value, Object fallback, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class CustomParserConfigWrongPropertyType
+        {
+            [ConfigSection]
+            public CustomParserSectionWrongPropertyType Section1 { get; set; }
+        }
+
+        private class CustomParserSectionWrongPropertyType
+        {
+            [ConfigValue]
+            [CustomParser(typeof(WrongPropertyType))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionWrongPropertyType_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigWrongPropertyType actual = ConfigParser<CustomParserConfigWrongPropertyType>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionInterfaceWithNoDefaultConstructor
+
+        private class InterfaceWithNoDefaultConstructor : ICustomParser<TestCustomType>
+        {
+            private InterfaceWithNoDefaultConstructor()
+            {
+            }
+
+            public TestCustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                return new TestCustomType();
+            }
+
+            public String Parse(String label, TestCustomType value, Object fallback, CultureInfo culture)
+            {
+                return value.ToString();
+            }
+        }
+
+        private class CustomParserConfigInterfaceWithNoDefaultConstructor
+        {
+            [ConfigSection]
+            public CustomParserSectionInterfaceWithNoDefaultConstructor Section1 { get; set; }
+        }
+
+        private class CustomParserSectionInterfaceWithNoDefaultConstructor
+        {
+            [ConfigValue]
+            [CustomParser(typeof(InterfaceWithNoDefaultConstructor))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionInterfaceWithNoDefaultConstructor_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigInterfaceWithNoDefaultConstructor actual = ConfigParser<CustomParserConfigInterfaceWithNoDefaultConstructor>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionInterfaceWithDefaultConstructorThrows
+
+        private class InterfaceWithDefaultConstructorThrows : ICustomParser<TestCustomType>
+        {
+            public InterfaceWithDefaultConstructorThrows()
+            {
+                throw new InvalidOperationException("This constructor should never be called!");
+            }
+
+            public TestCustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                return new TestCustomType();
+            }
+
+            public String Parse(String label, TestCustomType value, Object fallback, CultureInfo culture)
+            {
+                return value.ToString();
+            }
+        }
+
+        private class CustomParserConfigInterfaceWithDefaultConstructorThrows
+        {
+            [ConfigSection]
+            public CustomParserSectionInterfaceWithDefaultConstructorThrows Section1 { get; set; }
+        }
+
+        private class CustomParserSectionInterfaceWithDefaultConstructorThrows
+        {
+            [ConfigValue]
+            [CustomParser(typeof(InterfaceWithDefaultConstructorThrows))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionInterfaceWithDefaultConstructorThrows_ConstructConverterReturnsNull_ProertyIsNull()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                CustomParserConfigInterfaceWithDefaultConstructorThrows actual = ConfigParser<CustomParserConfigInterfaceWithDefaultConstructorThrows>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(actual.Section1.Complex1, Is.Null);
+            }
+        }
+
+        #endregion
+
+        #region CustomParserSectionFakeInterface
+
+        private class FakeInterfaceWithCallCounter : ICustomParser<TestCustomType>
+        {
+            // Keep in mind, it was impossible to have a mock for the interface implementation. 
+            // Therefore use of this workaround to verify the number of calls.
+
+            public static Int32 ParseFromCalls = 0;
+
+            public static Int32 ParseIntoCalls = 0;
+
+            public TestCustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                FakeInterfaceWithCallCounter.ParseFromCalls += 1;
+                return new TestCustomType();
+            }
+
+            public String Parse(String label, TestCustomType value, Object fallback, CultureInfo culture)
+            {
+                FakeInterfaceWithCallCounter.ParseIntoCalls += 1;
+                return value.ToString();
+            }
+        }
+
+        private class CustomParserConfigFakeInterface
+        {
+            [ConfigSection]
+            public CustomParserSectionFakeInterface Section1 { get; set; }
+        }
+
+        private class CustomParserSectionFakeInterface
+        {
+            [ConfigValue]
+            [CustomParser(typeof(FakeInterfaceWithCallCounter))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionFakeInterface_ConstructConverterReturnsNotNull_ParseFromWasCalledOnce()
+        {
+            FakeInterfaceWithCallCounter.ParseFromCalls = 0;
+            FakeInterfaceWithCallCounter.ParseIntoCalls = 0;
+
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                ConfigParser<CustomParserConfigFakeInterface>.Parse(ConfigReader.Read(stream));
+
+                Assert.That(FakeInterfaceWithCallCounter.ParseFromCalls, Is.EqualTo(1));
+                Assert.That(FakeInterfaceWithCallCounter.ParseIntoCalls, Is.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void CustomParserSectionFakeInterface_ConstructConverterReturnsNotNull_ParseIntoWasCalledOnce()
+        {
+            FakeInterfaceWithCallCounter.ParseFromCalls = 0;
+            FakeInterfaceWithCallCounter.ParseIntoCalls = 0;
+
+            CustomParserConfigFakeInterface instance = new CustomParserConfigFakeInterface() { Section1 = new CustomParserSectionFakeInterface() { Complex1 = new TestCustomType() } };
+
+            ConfigParser<CustomParserConfigFakeInterface>.Parse(instance);
+
+            Assert.That(FakeInterfaceWithCallCounter.ParseFromCalls, Is.EqualTo(0));
+            Assert.That(FakeInterfaceWithCallCounter.ParseIntoCalls, Is.EqualTo(1));
+        }
+
+        #endregion
+
+        #region CustomParserSectionCustomTypeThrowsAnyException
+
+        private class CustomTypeThrowsAnyException : ICustomParser<TestCustomType>
+        {
+            public TestCustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
+
+            public String Parse(String label, TestCustomType value, Object fallback, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class CustomParserConfigCustomTypeThrowsAnyException
+        {
+            [ConfigSection]
+            public CustomParserSectionCustomTypeThrowsAnyException Section1 { get; set; }
+        }
+
+        private class CustomParserSectionCustomTypeThrowsAnyException
+        {
+            [ConfigValue]
+            [CustomParser(typeof(CustomTypeThrowsAnyException))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionCustomTypeThrowsAnyException_ParseFromThrowsAnyException_ThrowsCustomParserException()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                Assert.That(() => ConfigParser<CustomParserConfigCustomTypeThrowsAnyException>.Parse(ConfigReader.Read(stream)), Throws.InstanceOf<CustomParserException>());
+            }
+        }
+
+        [Test]
+        public void CustomParserSectionCustomTypeThrowsAnyException_ParseIntoThrowsAnyException_ThrowsCustomParserException()
+        {
+            CustomParserConfigCustomTypeThrowsAnyException instance = new CustomParserConfigCustomTypeThrowsAnyException() { Section1 = new CustomParserSectionCustomTypeThrowsAnyException() { Complex1 = new TestCustomType() } };
+
+            Assert.That(() => ConfigParser<CustomParserConfigCustomTypeThrowsAnyException>.Parse(instance), Throws.InstanceOf<CustomParserException>());
+        }
+
+        #endregion
+
+        #region CustomParserSectionCustomTypeThrowsCustomParserException
+
+        private class CustomTypeThrowsCustomParserException : ICustomParser<TestCustomType>
+        {
+            public TestCustomType Parse(String label, String value, Object fallback, CultureInfo culture)
+            {
+                throw new CustomParserException(label, value, "parse from exception");
+            }
+
+            public String Parse(String label, TestCustomType value, Object fallback, CultureInfo culture)
+            {
+                throw new CustomParserException(label, null, "parse into exception");
+            }
+        }
+
+        private class CustomParserConfigCustomTypeThrowsCustomParserException
+        {
+            [ConfigSection]
+            public CustomParserSectionCustomTypeThrowsCustomParserException Section1 { get; set; }
+        }
+
+        private class CustomParserSectionCustomTypeThrowsCustomParserException
+        {
+            [ConfigValue]
+            [CustomParser(typeof(CustomTypeThrowsCustomParserException))]
+            public TestCustomType Complex1 { get; set; }
+        }
+
+        [Test]
+        public void CustomParserSectionCustomTypeThrowsCustomParserException_ParseFromThrowsCustomParserException_ThrowsCustomParserException()
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(ConfigParserTests.CustomParserTestContent)))
+            {
+                Assert.That(() => ConfigParser<CustomParserConfigCustomTypeThrowsCustomParserException>.Parse(ConfigReader.Read(stream)), Throws.InstanceOf<CustomParserException>());
+            }
+        }
+
+        [Test]
+        public void CustomParserSectionCustomTypeThrowsCustomParserException_ParseIntoThrowsCustomParserException_ThrowsCustomParserException()
+        {
+            CustomParserConfigCustomTypeThrowsCustomParserException instance = new CustomParserConfigCustomTypeThrowsCustomParserException() { Section1 = new CustomParserSectionCustomTypeThrowsCustomParserException() { Complex1 = new TestCustomType() } };
+
+            Assert.That(() => ConfigParser<CustomParserConfigCustomTypeThrowsCustomParserException>.Parse(instance), Throws.InstanceOf<CustomParserException>());
+        }
+
+        #endregion
 
         #endregion
 

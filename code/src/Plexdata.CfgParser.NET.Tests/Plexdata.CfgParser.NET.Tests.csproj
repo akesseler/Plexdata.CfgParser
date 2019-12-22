@@ -49,6 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\ConfigHeaderAttributeTests.cs" />
+    <Compile Include="Attributes\ConfigSectionAttributeTests.cs" />
+    <Compile Include="Attributes\ConfigValueAttributeTests.cs" />
+    <Compile Include="Attributes\CustomParserAttributeTests.cs" />
     <Compile Include="Converters\ValueConverterTests.cs" />
     <Compile Include="Entities\ConfigCommentTests.cs" />
     <Compile Include="Entities\ConfigContentTests.cs" />
@@ -57,6 +61,7 @@
     <Compile Include="Entities\ConfigOtherTests.cs" />
     <Compile Include="Entities\ConfigSectionTests.cs" />
     <Compile Include="Entities\ConfigValueTests.cs" />
+    <Compile Include="Exceptions\CustomParserExceptionTests.cs" />
     <Compile Include="Extensions\ConfigExtensionTests.cs" />
     <Compile Include="Extensions\StringExtensionTests.cs" />
     <Compile Include="Internals\AttributeDescriptorTests.cs" />
